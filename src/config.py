@@ -81,7 +81,7 @@ def loadConfiguration(configPath: str = "configs/TestRocket.json"):
     calculatedStages = _calculateAllStageMasses(
         payloadMass=rocketData["payloadMass"],
         stagesData=stagesData,
-        requiredDeltaV=configData["target"]["velocity"] * 1.1
+        requiredDeltaV=configData["target"]["velocity"] * 1.18
     )
 
     stagesList = []

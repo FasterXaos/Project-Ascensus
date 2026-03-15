@@ -1,0 +1,18 @@
+{
+  "rocket": {
+    "name": "FourStageRocket",
+    "initialAltitude": 0.0,
+    "payloadMass": 5000.0,
+    "stages": [
+      { "name": "Stage4", "structuralFraction": 0.14, "exhaustVelocity": 3150.0, "interstagePenalty": 400.0, "thrust": 600000.0 },
+      { "name": "Stage3", "structuralFraction": 0.12, "exhaustVelocity": 3050.0, "interstagePenalty": 500.0, "thrust": 1100000.0 },
+      { "name": "Stage2", "structuralFraction": 0.10, "exhaustVelocity": 2900.0, "interstagePenalty": 250.0, "thrust": 2100000.0 },
+      { "name": "Stage1", "structuralFraction": 0.08, "exhaustVelocity": 2750.0, "interstagePenalty": 0.0, "thrust": 3800000.0 }
+    ]
+  },
+  "target": { "altitude": 200000.0, "velocity": 7800.0 },
+  "atmosphere": { "seaLevelDensity": 1.225, "scaleHeight": 8500.0},
+  "gravity": { "standardGravity": 9.81, "planetRadius": 6371000.0, "planetMass": 5.972e24, "gConstant": 6.67430e-11 },
+  "simulation": { "timeStep": 0.1, "maxTime": 700.0 },
+  "aerodynamics": { "dragCoefficient": 0.5, "referenceArea": 20.0 }
+}

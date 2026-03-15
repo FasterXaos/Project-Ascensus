@@ -58,20 +58,20 @@ class Simulator:
 
             currentTime += self.timeStep
 
-            if height >= self.targetAltitude and velocity >= self.targetVelocity:
-                break
+            # if height >= self.targetAltitude and velocity >= self.targetVelocity:
+            #      break
 
         rocket.currentHeight = height
 
         if plot:
             self.plotResults(timeHistory, heightHistory, velocityHistory)
 
-        return height, velocity
+        return timeHistory, heightHistory, velocityHistory
 
     def plotResults(self, timeHistory: list, heightHistory: list, velocityHistory: list):
         """Кривые скорости и высоты от времени"""
         
-        fig, axs = plt.subplots(3, 1, figsize=(12, 12), sharex=False)
+        fig, axs = plt.subplots(3, 1, figsize=(10, 12), sharex=False)
         fig.suptitle("1D Simulation Results — Rocket Ascensus", fontsize=16, fontweight='bold')
 
         axs[0].plot(timeHistory, heightHistory, color='tab:blue', linewidth=2, label='Altitude')
@@ -94,5 +94,5 @@ class Simulator:
         axs[2].grid(True, alpha=0.3)
         axs[2].legend()
 
-        plt.tight_layout(rect=[0, 0, 1, 0.96])
+        plt.tight_layout()
         plt.show()

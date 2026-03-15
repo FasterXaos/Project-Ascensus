@@ -1,43 +1,89 @@
+import matplotlib.pyplot as plt
 from src.config import loadConfiguration
 
 def main():
-    """Главная функция — только загрузка конфига и проверка инициализации"""
-    configuration = loadConfiguration()
+    presets = [
+        # "configs/OneStageRocket.json",
+        "configs/TestRocket.json",
+        "configs/ThreeStageRocket.json",
+        "configs/FourStageRocket.json",
+    ]
 
-    print("=== Project Ascensus — инициализация из configs/TestRocket.json ===")
-    print(f"Ракета: {configuration['rocket'].name}")
-    print(f"Полезная нагрузка: {configuration['rocket'].payloadMass} кг\n")
+    print("=== Project Ascensus - сравнение многоступенчатых ракет ===\n")
+    results = []
+    allTrajectories = []
 
-    print("Ступени (массы рассчитаны по структурным коэффициентам):")
-    for stage in configuration['rocket'].stages:
-        print(f"  → {stage.name}:")
-        print(f"     Начальная масса         = {stage.initialMass:,.0f} кг")
-        print(f"     Топливо                 = {stage.fuelMass:,.0f} кг")
-        print(f"     Структура               = {stage.structuralMass:,.0f} кг")
-        print(f"     Структурный коэффициент = {stage.structuralFraction}")
-        print(f"     Скорость истечения      = {stage.exhaustVelocity} м/с")
-        print(f"     Тяга                    = {stage.thrust:,.0f} Н")
-        print(f"     Межступенчатый штраф = {stage.interstagePenalty} кг\n")
+    for configPath in presets:
+        configuration = loadConfiguration(configPath)
+        rocket = configuration["rocket"]
+        simulator = configuration["simulator"]
 
-    print(f"Цель симуляции: высота {configuration['simulator'].targetAltitude} м, "
-          f"скорость {configuration['simulator'].targetVelocity} м/с")
-    print(f"Расчётная начальная масса для проектирования: {configuration['rocket'].stages[-1].initialMass} кг стартовая масса (оптимизировано)")
+        print(f"  {rocket.name} ({len(rocket.stages)} ступеней)")
+        print("   Ступени (массы рассчитаны автоматически):")
+        for stage in rocket.stages:
+            print(f"     → {stage.name}: "
+                  f"топливо {stage.fuelMass:,.0f} кг | "
+                  f"структура {stage.structuralMass:,.0f} кг | "
+                  f"тяга {stage.thrust:,.0f} Н")
+        print(f"   Стартовая масса ракеты: {rocket.getCurrentRocketMass():,.0f} кг\n")
 
-    print("\nВсе классы успешно инициализированы из конфига.")
-    print(configuration['rocket'].getCurrentRocketMass())
+        timeHistory, heightHistory, velocityHistory = simulator.runSimulation(
+            rocket,
+            configuration["gravity"],
+            configuration["atmosphere"],
+            configuration["aerodynamics"],
+            plot=True
+        )
 
-    height, velocity = configuration["simulator"].runSimulation(
-        configuration["rocket"],
-        configuration["gravity"],
-        configuration["atmosphere"],
-        configuration["aerodynamics"],
-        plot=True
-    )
+        finalHeight = heightHistory[-1]
+        finalVelocity = velocityHistory[-1]
+        success = (finalHeight >= simulator.targetAltitude and
+                   finalVelocity >= simulator.targetVelocity)
 
-    print("\n=== RESULT ===")
-    print(f"Final height: {height:.1f} m")
-    print(f"Final velocity: {velocity:.1f} m/s")
+        results.append({
+            "name": rocket.name,
+            "stages": len(rocket.stages),
+            "finalHeight": finalHeight,
+            "finalVelocity": finalVelocity,
+            "success": " Да" if success else " Нет",
+            "startMass": rocket.stages[-1].initialMass
+        })
 
+        allTrajectories.append((rocket.name, timeHistory, heightHistory, velocityHistory))
+
+    print("=" * 100)
+    print(f"{'Ракета':<18} {'Ступеней'} {'Старт. масса, кг':>12} {'Фин. высота, м':>15} "
+          f"{'Фин. скорость, м/с':>18} {'Достигнута цель'}")
+    print("=" * 100)
+    for r in results:
+        print(f"{r['name']:<18} {r['stages']:^8} {r['startMass']:>12,.0f} "
+              f"{r['finalHeight']:>15,.0f} {r['finalVelocity']:>18,.1f} {r['success']:>15}")
+    print("=" * 100)
+
+    plt.figure(figsize=(12, 7))
+    for name, timeH, heightH, velocityH in allTrajectories:
+        plt.plot(timeH, heightH, label=f"{name} ({[s for s in results if s['name']==name][0]['stages']} ст.)", linewidth=2)
     
+    plt.axhline(y=200000, color='red', linestyle='--', label='Цель 200 км')
+    plt.xlabel("Время, с")
+    plt.ylabel("Высота, м")
+    plt.title("Сравнение траекторий")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
+    for name, timeH, heightH, velocityH in allTrajectories:
+        plt.plot(timeH, velocityH, label=f"{name} ({[s for s in results if s['name']==name][0]['stages']} ст.)", linewidth=2)
+    
+    plt.axhline(y=7800, color='red', linestyle='--', label='Цель 7800 м/с')
+    plt.xlabel("Время, с")
+    plt.ylabel("Скорость, м")
+    plt.title("Сравнение траекторий")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
 if __name__ == "__main__":
     main()
