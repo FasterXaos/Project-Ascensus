@@ -24,6 +24,20 @@ def main():
     print(f"Расчётная начальная масса для проектирования: {configuration['rocket'].stages[-1].initialMass} кг стартовая масса (оптимизировано)")
 
     print("\nВсе классы успешно инициализированы из конфига.")
+    print(configuration['rocket'].getCurrentRocketMass())
 
+    height, velocity = configuration["simulator"].runSimulation(
+        configuration["rocket"],
+        configuration["gravity"],
+        configuration["atmosphere"],
+        configuration["aerodynamics"],
+        plot=True
+    )
+
+    print("\n=== RESULT ===")
+    print(f"Final height: {height:.1f} m")
+    print(f"Final velocity: {velocity:.1f} m/s")
+
+    
 if __name__ == "__main__":
     main()

@@ -1,6 +1,7 @@
 {
   "rocket": {
     "name": "TestRocket",
+    "initialAltitude": 0.0,
     "payloadMass": 5000.0,
     "stages": [
       {
@@ -25,12 +26,13 @@
   },
   "atmosphere": {
     "seaLevelDensity": 1.225,
-    "scaleHeight": 8500.0,
-    "initialAltitude": 0.0
+    "scaleHeight": 8500.0
   },
   "gravity": {
     "standardGravity": 9.81,
-    "earthRadius": 6371000.0
+    "planetRadius": 6371000.0,
+    "planetMass": 5.972e24,
+    "gConstant": 6.67430e-11
   },
   "simulation": {
     "timeStep": 0.1,

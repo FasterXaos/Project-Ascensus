@@ -1,6 +1,13 @@
+import math
+
 class Atmosphere:
-    def __init__(self, seaLevelDensity: float, scaleHeight: float,
-                 initialAltitude: float):
+    """Класс атмосферы"""
+
+    def __init__(self, seaLevelDensity: float = 1.225, scaleHeight: float = 8500.0):
         self.seaLevelDensity = seaLevelDensity
         self.scaleHeight = scaleHeight
-        self.initialAltitude = initialAltitude
+
+    def getAirDensityAtHeight(self, height: float) -> float:
+        """Плотность воздуха на заданной высоте"""
+        
+        return self.seaLevelDensity * math.exp(-height / self.scaleHeight)

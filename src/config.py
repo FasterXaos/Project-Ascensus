@@ -70,7 +70,8 @@ def _calculateAllStageMasses(payloadMass: float,
     return results
 
 def loadConfiguration(configPath: str = "configs/TestRocket.json"):
-    """Читает JSON из configs/ и инициализирует все классы"""
+    """Читает JSON и инициализирует все классы"""
+
     with open(configPath, "r", encoding="utf-8") as file:
         configData = json.load(file)
 
@@ -80,7 +81,7 @@ def loadConfiguration(configPath: str = "configs/TestRocket.json"):
     calculatedStages = _calculateAllStageMasses(
         payloadMass=rocketData["payloadMass"],
         stagesData=stagesData,
-        requiredDeltaV=configData["target"]["velocity"] * 1.20
+        requiredDeltaV=configData["target"]["velocity"] * 1.1
     )
 
     stagesList = []
@@ -99,6 +100,7 @@ def loadConfiguration(configPath: str = "configs/TestRocket.json"):
 
     rocket = Rocket(
         name=rocketData["name"],
+        initialAltitude=rocketData["initialAltitude"],
         payloadMass=rocketData["payloadMass"],
         stages=stagesList
     )
@@ -113,12 +115,13 @@ def loadConfiguration(configPath: str = "configs/TestRocket.json"):
     atmosphere = Atmosphere(
         seaLevelDensity=configData["atmosphere"]["seaLevelDensity"],
         scaleHeight=configData["atmosphere"]["scaleHeight"],
-        initialAltitude=configData["atmosphere"]["initialAltitude"]
     )
 
     gravity = Gravity(
         standardGravity=configData["gravity"]["standardGravity"],
-        earthRadius=configData["gravity"]["earthRadius"]
+        planetRadius=configData["gravity"]["planetRadius"],
+        planetMass=configData["gravity"]["planetMass"],
+        gConstant=configData["gravity"]["gConstant"]
     )
 
     aerodynamics = Aerodynamics(
