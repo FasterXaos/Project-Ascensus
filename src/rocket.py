@@ -1,3 +1,5 @@
+from typing import Optional
+
 class Rocket:
     """Класс ракеты"""
     def __init__(self, name: str, initialAltitude: float, payloadMass: float, stages: list):
@@ -18,7 +20,7 @@ class Rocket:
         fullMass = sum(stage.getFullStageMass() for stage in self.stages)
         return fullMass + self.payloadMass
     
-    def setHeight(self, height: float = None) -> None:
+    def setHeight(self, height: Optional[float] = None) -> None:
         """Устанавливает текущую высоту ракеты.
         Если height=None — сбрасывает на initialAltitude (по умолчанию)"""
         if height is None:
@@ -58,10 +60,10 @@ class Rocket:
         if -len(self.activeStages) <= stageIndex < len(self.activeStages):
             detachedStage = self.activeStages.pop(stageIndex)
 
-            print(
-                f"Ступень {detachedStage.name} отсоединена. "
-                f"Текущая масса ракеты: {self.getCurrentRocketMass():.2f} кг"
-            )
+            #print(
+            #    f"Ступень {detachedStage.name} отсоединена. "
+            #    f"Текущая масса ракеты: {self.getCurrentRocketMass():.2f} кг"
+            #)
 
     def reloadRocket(self, resetHeight: bool = True) -> None:
         """Перезагрузка ракеты: полностью восстанавливает активные ступени и топливо.

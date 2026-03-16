@@ -21,13 +21,17 @@ def _calculateStageMasses(payloadMass: float,
 
     denominator = 1.0 - structuralFraction * massRatio
     if denominator <= 0:
-        raise ValueError("Structural fraction too large for given deltaV")
+        print("Structural fraction too large for given deltaV")
+        propellantMass = 100000
+        structuralMass = 100000
+        initialMass = payloadMass + propellantMass + structuralMass
+        return initialMass, propellantMass, structuralMass
 
     propellantMass = payloadMass * (massRatio - 1.0) * (1.0 - structuralFraction) / denominator
     structuralMass = (structuralFraction / (1.0 - structuralFraction)) * propellantMass
 
     initialMass = payloadMass + propellantMass + structuralMass
-
+    
     return initialMass, propellantMass, structuralMass
 
 def _calculateAllStageMasses(payloadMass: float,

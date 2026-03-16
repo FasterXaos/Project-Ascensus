@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 
 from src.config import loadConfiguration
+from src.optimizer import RocketMassOptimizer
 from src.rocket import Rocket
 from src.simulator import Simulator
 
@@ -75,7 +76,7 @@ def main():
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.show()
+    # plt.show()
 
     for name, timeH, heightH, velocityH in allTrajectories:
         plt.plot(timeH, velocityH, label=f"{name} ({[s for s in results if s['name']==name][0]['stages']} ст.)", linewidth=2)
@@ -87,7 +88,7 @@ def main():
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.show()
+    # plt.show()
 
 
     configuration = loadConfiguration(presets[0])
@@ -106,8 +107,25 @@ def main():
         configuration["gravity"],
         configuration["atmosphere"],
         configuration["aerodynamics"],
-        plot=True
+        plot=False
     )
+
+    config = loadConfiguration("configs/rocket/OneStageRocket.json")
+    rocket = config["rocket"]
+    simulator = config["simulator"]
+    atmosphere = config["atmosphere"]
+    gravity = config["gravity"]
+    aerodynamics = config["aerodynamics"]
+
+    optimizer = RocketMassOptimizer(rocket, simulator, atmosphere, gravity, aerodynamics)
+
+    result = optimizer.optimize(
+        initialFuelGuess=None,
+        bounds=None,
+        maxiter=150
+    )
+
+    simulator.runSimulation(rocket, gravity, atmosphere, aerodynamics, plot=True)
 
 if __name__ == "__main__":
     main()
