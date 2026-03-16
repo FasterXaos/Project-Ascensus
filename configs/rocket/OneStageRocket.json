@@ -1,0 +1,20 @@
+{
+  "rocket": {
+    "name": "OneStageRocket",
+    "initialAltitude": 0.0,
+    "payloadMass": 5000.0,
+    "stages": [
+      {
+        "name": "Stage1",
+        "structuralFraction": 0.09,
+        "exhaustVelocity": 3100.0,
+        "interstagePenalty": 0.0,
+        "thrust": 3200000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.5,
+	  "referenceArea": 20.0
+  }
+}

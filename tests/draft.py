@@ -146,7 +146,7 @@ def test():
     print(f"Итоговый Δv = {deltaVTime:,.0f} м/с\n")
 
     payloadMass = 5_000             # кг
-    requiredDeltaV = 9_400          # м/с (LEO + потери)
+    requiredDeltaV = 7_800          # м/с (LEO + потери)
     exhaustVelocity = 2_800         # м/с
     structuralFraction = 0.12       # 12% конструкции в каждой ступени
     interstagePenalty = 800.0       # кг штрафа за каждую дополнительную ступень

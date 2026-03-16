@@ -3,7 +3,6 @@ import math
 
 class Simulator:
     """Класс симуляции полета ракеты"""
-
     def __init__(self, targetAltitude: float, targetVelocity: float,
                  timeStep: float, maxTime: float):
         self.targetAltitude = targetAltitude
@@ -58,37 +57,38 @@ class Simulator:
 
             currentTime += self.timeStep
 
-            # if height >= self.targetAltitude and velocity >= self.targetVelocity:
-            #      break
+            if height >= self.targetAltitude and velocity >= self.targetVelocity:
+                break
 
         rocket.currentHeight = height
 
         if plot:
-            self.plotResults(timeHistory, heightHistory, velocityHistory)
+            rocketName = rocket.name
+            self.plotResults(rocketName, timeHistory, heightHistory, velocityHistory)
 
         return timeHistory, heightHistory, velocityHistory
 
-    def plotResults(self, timeHistory: list, heightHistory: list, velocityHistory: list):
+    def plotResults(self, rocketName: str, timeHistory: list, heightHistory: list, velocityHistory: list):
         """Кривые скорости и высоты от времени"""
         
         fig, axs = plt.subplots(3, 1, figsize=(10, 12), sharex=False)
-        fig.suptitle("1D Simulation Results — Rocket Ascensus", fontsize=16, fontweight='bold')
+        fig.suptitle(f"1D Simulation Results — Rocket Ascensus {rocketName}", fontsize=16)
 
-        axs[0].plot(timeHistory, heightHistory, color='tab:blue', linewidth=2, label='Altitude')
-        axs[0].axhline(y=self.targetAltitude, color='tab:red', linestyle='--', linewidth=1.5, label='Target Altitude')
+        axs[0].plot(timeHistory, heightHistory, linewidth=2, label='Altitude')
+        axs[0].axhline(y=self.targetAltitude, color='red', linestyle='--', linewidth=1.5, label='Target Altitude')
         axs[0].set_ylabel('Altitude (m)')
         axs[0].grid(True, alpha=0.3)
         axs[0].legend()
 
-        axs[1].plot(timeHistory, velocityHistory, color='tab:orange', linewidth=2, label='Velocity')
-        axs[1].axhline(y=self.targetVelocity, color='tab:red', linestyle='--', linewidth=1.5, label='Target Velocity')
+        axs[1].plot(timeHistory, velocityHistory, color='orange', linewidth=2, label='Velocity')
+        axs[1].axhline(y=self.targetVelocity, color='red', linestyle='--', linewidth=1.5, label='Target Velocity')
         axs[1].set_ylabel('Velocity (m/s)')
         axs[1].grid(True, alpha=0.3)
         axs[1].legend()
 
-        axs[2].plot(velocityHistory, heightHistory, color='tab:green', linewidth=2, label='Trajectory')
-        axs[2].axhline(y=self.targetAltitude, color='tab:red', linestyle='--', linewidth=1.5, label='Target Altitude')
-        axs[2].axvline(x=self.targetVelocity, color='tab:red', linestyle='--', linewidth=1.5, label='Target Velocity')
+        axs[2].plot(velocityHistory, heightHistory, color='green', linewidth=2, label='Trajectory')
+        axs[2].axhline(y=self.targetAltitude, color='red', linestyle='--', linewidth=1.5, label='Target Altitude')
+        axs[2].axvline(x=self.targetVelocity, color='red', linestyle='--', linewidth=1.5, label='Target Velocity')
         axs[2].set_xlabel('Velocity (m/s)')
         axs[2].set_ylabel('Altitude (m)')
         axs[2].grid(True, alpha=0.3)

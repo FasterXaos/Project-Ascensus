@@ -1,12 +1,16 @@
 import matplotlib.pyplot as plt
+
 from src.config import loadConfiguration
+from src.rocket import Rocket
+from src.simulator import Simulator
 
 def main():
+
     presets = [
-        # "configs/OneStageRocket.json",
-        "configs/TestRocket.json",
-        "configs/ThreeStageRocket.json",
-        "configs/FourStageRocket.json",
+        # "configs/rocket/OneStageRocket.json",
+        "configs/rocket/TestRocket.json",
+        "configs/rocket/ThreeStageRocket.json",
+        "configs/rocket/FourStageRocket.json",
     ]
 
     print("=== Project Ascensus - сравнение многоступенчатых ракет ===\n")
@@ -15,10 +19,10 @@ def main():
 
     for configPath in presets:
         configuration = loadConfiguration(configPath)
-        rocket = configuration["rocket"]
-        simulator = configuration["simulator"]
+        rocket: Rocket = configuration["rocket"]
+        simulator: Simulator = configuration["simulator"]
 
-        print(f"  {rocket.name} ({len(rocket.stages)} ступеней)")
+        print(f"\n  {rocket.name} ({len(rocket.stages)} ступеней)")
         print("   Ступени (массы рассчитаны автоматически):")
         for stage in rocket.stages:
             print(f"     → {stage.name}: "
@@ -32,7 +36,7 @@ def main():
             configuration["gravity"],
             configuration["atmosphere"],
             configuration["aerodynamics"],
-            plot=True
+            plot=False
         )
 
         finalHeight = heightHistory[-1]
@@ -46,7 +50,7 @@ def main():
             "finalHeight": finalHeight,
             "finalVelocity": finalVelocity,
             "success": " Да" if success else " Нет",
-            "startMass": rocket.stages[-1].initialMass
+            "startMass": rocket.getFullRocketMass()
         })
 
         allTrajectories.append((rocket.name, timeHistory, heightHistory, velocityHistory))
@@ -84,6 +88,26 @@ def main():
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.show()
+
+
+    configuration = loadConfiguration(presets[0])
+    rocket = configuration["rocket"]
+    print(rocket.getFullRocketMass())
+
+    rocket.reloadRocket()
+    rocket.reloadRocket(resetHeight=False)
+
+    fuelList = [40000.0, 300000.0]          # топливо для Stage2 и Stage1
+    rocket.initializeMassesFromFuelMasses(fuelList)
+    print("Новые массы инициализированы, ракета готова к запуску")
+
+    simulator.runSimulation(
+        rocket,
+        configuration["gravity"],
+        configuration["atmosphere"],
+        configuration["aerodynamics"],
+        plot=True
+    )
 
 if __name__ == "__main__":
     main()

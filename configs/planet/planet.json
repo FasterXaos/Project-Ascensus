@@ -1,0 +1,12 @@
+{
+  "atmosphere": {
+    "seaLevelDensity": 1.225,
+    "scaleHeight": 8500.0
+  },
+  "gravity": {
+    "standardGravity": 9.81,
+    "planetRadius": 6371000.0,
+    "planetMass": 5.972e24,
+    "gConstant": 6.67430e-11
+  }
+}

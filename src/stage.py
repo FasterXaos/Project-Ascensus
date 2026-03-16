@@ -6,7 +6,6 @@ class Stage:
                  structuralFraction: float, interstagePenalty: float,
                  thrust: float):
         self.name = name
-        self.initialMass = initialMass
         self.fuelMass = fuelMass
         self.structuralMass = structuralMass
         self.exhaustVelocity = exhaustVelocity
@@ -19,12 +18,10 @@ class Stage:
 
     def calculateBurnTime(self) -> float:
         """Время полного выгорания топлива ступени"""
-
         return self.burnTime
 
     def updateFuelMassOverTime(self, timeStep: float) -> None:
         """Расход топлива за шаг времени (fuelFlow)"""
-        
         if self.massFlowRate > 0 and self.currentFuelMass > 0:
             burnedMass = self.massFlowRate * timeStep
             self.currentFuelMass = max(0.0, self.currentFuelMass - burnedMass)
@@ -32,3 +29,7 @@ class Stage:
     def getCurrentStageMass(self) -> float:
         """Текущая масса ступени (учитывает сгорание топлива)"""
         return self.structuralMass + self.currentFuelMass + self.interstagePenalty
+    
+    def getFullStageMass(self) -> float:
+        """Полная масса ступени при полном топливе"""
+        return self.structuralMass + self.fuelMass + self.interstagePenalty

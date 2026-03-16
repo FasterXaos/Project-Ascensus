@@ -69,19 +69,27 @@ def _calculateAllStageMasses(payloadMass: float,
 
     return results
 
-def loadConfiguration(configPath: str = "configs/TestRocket.json"):
-    """Читает JSON и инициализирует все классы"""
+def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
+                      simulationConfigPath: str = "configs/simulation/simulation.json",
+                      planetConfigPath: str = "configs/planet/planet.json"):
+    """Читает три отдельных JSON-конфига (ракета + симуляция + планета) и инициализирует все классы"""
 
-    with open(configPath, "r", encoding="utf-8") as file:
-        configData = json.load(file)
+    with open(rocketConfigPath, "r", encoding="utf-8") as file:
+        rocketConfigData = json.load(file)
 
-    rocketData = configData["rocket"]
+    with open(simulationConfigPath, "r", encoding="utf-8") as file:
+        simulationConfigData = json.load(file)
+
+    with open(planetConfigPath, "r", encoding="utf-8") as file:
+        planetConfigData = json.load(file)
+
+    rocketData = rocketConfigData["rocket"]
     stagesData = rocketData["stages"]
 
     calculatedStages = _calculateAllStageMasses(
         payloadMass=rocketData["payloadMass"],
         stagesData=stagesData,
-        requiredDeltaV=configData["target"]["velocity"] * 1.18
+        requiredDeltaV=simulationConfigData["target"]["velocity"] * 1.18
     )
 
     stagesList = []
@@ -106,27 +114,27 @@ def loadConfiguration(configPath: str = "configs/TestRocket.json"):
     )
 
     simulator = Simulator(
-        targetAltitude=configData["target"]["altitude"],
-        targetVelocity=configData["target"]["velocity"],
-        timeStep=configData["simulation"]["timeStep"],
-        maxTime=configData["simulation"]["maxTime"]
+        targetAltitude=simulationConfigData["target"]["altitude"],
+        targetVelocity=simulationConfigData["target"]["velocity"],
+        timeStep=simulationConfigData["simulation"]["timeStep"],
+        maxTime=simulationConfigData["simulation"]["maxTime"]
     )
 
     atmosphere = Atmosphere(
-        seaLevelDensity=configData["atmosphere"]["seaLevelDensity"],
-        scaleHeight=configData["atmosphere"]["scaleHeight"],
+        seaLevelDensity=planetConfigData["atmosphere"]["seaLevelDensity"],
+        scaleHeight=planetConfigData["atmosphere"]["scaleHeight"],
     )
 
     gravity = Gravity(
-        standardGravity=configData["gravity"]["standardGravity"],
-        planetRadius=configData["gravity"]["planetRadius"],
-        planetMass=configData["gravity"]["planetMass"],
-        gConstant=configData["gravity"]["gConstant"]
+        standardGravity=planetConfigData["gravity"]["standardGravity"],
+        planetRadius=planetConfigData["gravity"]["planetRadius"],
+        planetMass=planetConfigData["gravity"]["planetMass"],
+        gConstant=planetConfigData["gravity"]["gConstant"]
     )
 
     aerodynamics = Aerodynamics(
-        dragCoefficient=configData["aerodynamics"]["dragCoefficient"],
-        referenceArea=configData["aerodynamics"]["referenceArea"]
+        dragCoefficient=rocketConfigData["aerodynamics"]["dragCoefficient"],
+        referenceArea=rocketConfigData["aerodynamics"]["referenceArea"]
     )
 
     return {
