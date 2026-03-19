@@ -1,7 +1,7 @@
 class Stage:
     """Класс одной ступени ракеты"""
 
-    def __init__(self, name: str, initialMass: float, fuelMass: float,
+    def __init__(self, name: str, fuelMass: float,
                  structuralMass: float, exhaustVelocity: float,
                  structuralFraction: float, interstagePenalty: float,
                  thrust: float):
@@ -20,11 +20,21 @@ class Stage:
         """Время полного выгорания топлива ступени"""
         return self.burnTime
 
-    def updateFuelMassOverTime(self, timeStep: float) -> None:
-        """Расход топлива за шаг времени (fuelFlow)"""
-        if self.massFlowRate > 0 and self.currentFuelMass > 0:
-            burnedMass = self.massFlowRate * timeStep
-            self.currentFuelMass = max(0.0, self.currentFuelMass - burnedMass)
+    def updateFuelMassOverTime(self, timeStep: float) -> float:
+        """Обновляет currentFuelMass и возвращает эффективную тягу за этот шаг.
+        Учитывает случай, когда remainingFuel < massFlowRate * timeStep (partial burn)."""
+        if self.massFlowRate <= 0.0 or self.currentFuelMass <= 0.0:
+            return 0.0
+
+        burnedMass = self.massFlowRate * timeStep
+
+        if burnedMass > self.currentFuelMass:
+            fraction = self.currentFuelMass / burnedMass
+            self.currentFuelMass = 0.0
+            return self.thrust * fraction
+        else:
+            self.currentFuelMass -= burnedMass
+            return self.thrust
 
     def getCurrentStageMass(self) -> float:
         """Текущая масса ступени (учитывает сгорание топлива)"""

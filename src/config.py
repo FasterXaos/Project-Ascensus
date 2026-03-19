@@ -8,7 +8,8 @@ from .atmosphere import Atmosphere
 from .gravity import Gravity
 from .aerodynamics import Aerodynamics
 
-def _calculateStageMasses(payloadMass: float,
+def _calculateStageMasses(rocketName: str,
+                          payloadMass: float,
                           stageDeltaV: float,
                           exhaustVelocity: float,
                           structuralFraction: float):
@@ -21,7 +22,7 @@ def _calculateStageMasses(payloadMass: float,
 
     denominator = 1.0 - structuralFraction * massRatio
     if denominator <= 0:
-        print("Structural fraction too large for given deltaV")
+        print(f"Structural fraction of {rocketName} too large for given deltaV")
         propellantMass = 100000
         structuralMass = 100000
         initialMass = payloadMass + propellantMass + structuralMass
@@ -34,7 +35,8 @@ def _calculateStageMasses(payloadMass: float,
     
     return initialMass, propellantMass, structuralMass
 
-def _calculateAllStageMasses(payloadMass: float,
+def _calculateAllStageMasses(rocketName: str,
+                             payloadMass: float,
                              stagesData: list,
                              requiredDeltaV: float):
     """Расчёт масс всех ступеней при идеальных условиях (уравнение Циолковского)"""
@@ -52,6 +54,7 @@ def _calculateAllStageMasses(payloadMass: float,
         interstagePenalty = stageData.get("interstagePenalty", 0.0)
 
         initialMass, fuelMass, structuralMass = _calculateStageMasses(
+            rocketName=rocketName,
             payloadMass=currentUpperMass,
             stageDeltaV=stageDeltaV,
             exhaustVelocity=exhaustVelocity,
@@ -60,7 +63,6 @@ def _calculateAllStageMasses(payloadMass: float,
 
         results.append({
             "name": stageData["name"],
-            "initialMass": initialMass,
             "fuelMass": fuelMass,
             "structuralMass": structuralMass,
             "exhaustVelocity": exhaustVelocity,
@@ -91,6 +93,7 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
     stagesData = rocketData["stages"]
 
     calculatedStages = _calculateAllStageMasses(
+        rocketName=rocketData["name"],
         payloadMass=rocketData["payloadMass"],
         stagesData=stagesData,
         requiredDeltaV=simulationConfigData["target"]["velocity"] * 1.18
@@ -100,7 +103,6 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
     for calc in calculatedStages:
         stage = Stage(
             name=calc["name"],
-            initialMass=calc["initialMass"],
             fuelMass=calc["fuelMass"],
             structuralMass=calc["structuralMass"],
             exhaustVelocity=calc["exhaustVelocity"],
@@ -118,7 +120,6 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
     )
 
     simulator = Simulator(
-        targetAltitude=simulationConfigData["target"]["altitude"],
         targetVelocity=simulationConfigData["target"]["velocity"],
         timeStep=simulationConfigData["simulation"]["timeStep"],
         maxTime=simulationConfigData["simulation"]["maxTime"]

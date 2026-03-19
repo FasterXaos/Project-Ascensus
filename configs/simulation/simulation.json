@@ -1,6 +1,5 @@
 {
   "target": {
-    "altitude": 250000.0,
     "velocity": 7800.0
   },
   "simulation": {

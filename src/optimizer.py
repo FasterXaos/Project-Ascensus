@@ -12,9 +12,9 @@ class RocketMassOptimizer:
         self.gravity = gravity
         self.aerodynamics = aerodynamics
 
-    def _objectiveFunction(self, fuelMasses: list[float], targetAltitude: float, targetVelocity: float,
-                           penaltyWeight: float = 1_000_000_000.0) -> float:
-        """Целевая функция: минимизируем полную массу + штраф за недостижение целей"""
+    def _objectiveFunction(self, fuelMasses: list[float], targetVelocity: float,
+                           penaltyWeight: float = 1_000_000.0) -> float:
+        """Целевая функция: минимизируем полную массу + штраф за недостижение скорости"""
 
         self.rocket.initializeMassesFromFuelMasses(fuelMasses)
 
@@ -22,36 +22,26 @@ class RocketMassOptimizer:
             self.rocket, self.gravity, self.atmosphere, self.aerodynamics, plot=False
         )
 
-        heightHistory = np.array(heightHistory)
-        velocityHistory = np.array(velocityHistory)
-
-        altNormError = np.abs(heightHistory - targetAltitude) / targetAltitude
-        velNormError = np.abs(velocityHistory - targetVelocity) / targetVelocity
-
-        totalNormError = altNormError + velNormError
-        minError = np.min(totalNormError)          # самое близкое приближение за весь полёт
+        finalVelocity = velocityHistory[-1]
+        velNormError = abs(finalVelocity - targetVelocity) / targetVelocity
 
         fullMass = self.rocket.getFullRocketMass()
-
-        penalty = penaltyWeight * (minError ** 2)
+        penalty = penaltyWeight * (velNormError ** 2)
 
         return fullMass + penalty
 
     def optimize(self, initialFuelGuess: Optional[list[float]] = None,
                  bounds: Optional[list[tuple[float, float]]] = None,
-                 targetAltitude: Optional[float] = None,
                  targetVelocity: Optional[float] = None,
                  maxiter: int = 200) -> dict:
         """Запуск оптимизации"""
 
-        if targetAltitude is None:
-            targetAltitude = self.simulator.targetAltitude
         if targetVelocity is None:
             targetVelocity = self.simulator.targetVelocity
 
         if bounds is None:
             payload = self.rocket.payloadMass
-            bounds = [(payload * 2.0, 2_000_000.0) for _ in self.rocket.stages]
+            bounds = [(payload, 2_000_000.0) for _ in self.rocket.stages]
 
         if initialFuelGuess is None:
             initialFuelGuess = [stage.fuelMass for stage in self.rocket.stages]
@@ -59,7 +49,7 @@ class RocketMassOptimizer:
         result = differential_evolution(
             self._objectiveFunction,
             bounds=bounds,
-            args=(targetAltitude, targetVelocity),
+            args=(targetVelocity,),
             maxiter=maxiter,
             workers=-1,
             updating="deferred"

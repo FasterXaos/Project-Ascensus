@@ -8,7 +8,7 @@ from src.simulator import Simulator
 def main():
 
     presets = [
-        # "configs/rocket/OneStageRocket.json",
+        "configs/rocket/OneStageRocket.json",
         "configs/rocket/TestRocket.json",
         "configs/rocket/ThreeStageRocket.json",
         "configs/rocket/FourStageRocket.json",
@@ -42,8 +42,7 @@ def main():
 
         finalHeight = heightHistory[-1]
         finalVelocity = velocityHistory[-1]
-        success = (finalHeight >= simulator.targetAltitude and
-                   finalVelocity >= simulator.targetVelocity)
+        success = (finalVelocity >= simulator.targetVelocity)
 
         results.append({
             "name": rocket.name,
@@ -65,35 +64,34 @@ def main():
               f"{r['finalHeight']:>15,.0f} {r['finalVelocity']:>18,.1f} {r['success']:>15}")
     print("=" * 100)
 
-    plt.figure(figsize=(12, 7))
-    for name, timeH, heightH, velocityH in allTrajectories:
-        plt.plot(timeH, heightH, label=f"{name} ({[s for s in results if s['name']==name][0]['stages']} ст.)", linewidth=2)
+    # plt.figure(figsize=(12, 7))
+    # for name, timeH, heightH, velocityH in allTrajectories:
+    #     plt.plot(timeH, heightH, label=f"{name} ({[s for s in results if s['name']==name][0]['stages']} ст.)", linewidth=2)
     
-    plt.axhline(y=200000, color='red', linestyle='--', label='Цель 200 км')
-    plt.xlabel("Время, с")
-    plt.ylabel("Высота, м")
-    plt.title("Сравнение траекторий")
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+    # plt.axhline(y=200000, color='red', linestyle='--', label='Цель 200 км')
+    # plt.xlabel("Время, с")
+    # plt.ylabel("Высота, м")
+    # plt.title("Сравнение траекторий")
+    # plt.legend()
+    # plt.grid(True, alpha=0.3)
+    # plt.tight_layout()
     # plt.show()
 
-    for name, timeH, heightH, velocityH in allTrajectories:
-        plt.plot(timeH, velocityH, label=f"{name} ({[s for s in results if s['name']==name][0]['stages']} ст.)", linewidth=2)
+    # for name, timeH, heightH, velocityH in allTrajectories:
+    #     plt.plot(timeH, velocityH, label=f"{name} ({[s for s in results if s['name']==name][0]['stages']} ст.)", linewidth=2)
     
-    plt.axhline(y=7800, color='red', linestyle='--', label='Цель 7800 м/с')
-    plt.xlabel("Время, с")
-    plt.ylabel("Скорость, м")
-    plt.title("Сравнение траекторий")
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+    # plt.axhline(y=7800, color='red', linestyle='--', label='Цель 7800 м/с')
+    # plt.xlabel("Время, с")
+    # plt.ylabel("Скорость, м")
+    # plt.title("Сравнение траекторий")
+    # plt.legend()
+    # plt.grid(True, alpha=0.3)
+    # plt.tight_layout()
     # plt.show()
 
-
-    configuration = loadConfiguration(presets[0])
+    configuration = loadConfiguration(presets[1])
     rocket = configuration["rocket"]
-    print(rocket.getFullRocketMass())
+    print(f"Полная масса {rocket.name}: {rocket.getFullRocketMass()} кг")
 
     rocket.reloadRocket()
     rocket.reloadRocket(resetHeight=False)
@@ -110,7 +108,7 @@ def main():
         plot=False
     )
 
-    config = loadConfiguration("configs/rocket/OneStageRocket.json")
+    config = loadConfiguration("configs/rocket/ThreeStageRocket.json")
     rocket = config["rocket"]
     simulator = config["simulator"]
     atmosphere = config["atmosphere"]
@@ -122,10 +120,28 @@ def main():
     result = optimizer.optimize(
         initialFuelGuess=None,
         bounds=None,
-        maxiter=150
+        maxiter=1050
     )
 
-    simulator.runSimulation(rocket, gravity, atmosphere, aerodynamics, plot=True)
+    optimalFuelMasses = result["optimalFuelMasses"]
+    rocket.initializeMassesFromFuelMasses(optimalFuelMasses)
+    rocket.reloadRocket()
+
+    idealSpeed = rocket.calculateIdealMaximumVelocity()
+    print(f"Идеальная максимальная скорость (Циолковский): {idealSpeed:.1f} м/с")
+    simulator.runSimulation(rocket, gravity, atmosphere, aerodynamics, plot=True, saveCSV=True)
+
+
+    config = loadConfiguration("configs/rocket/ThreeStageRocket.json")
+    rocket = config["rocket"]
+    simulator = config["simulator"]
+    atmosphere = config["atmosphere"]
+    gravity = config["gravity"]
+    aerodynamics = config["aerodynamics"]
+
+    idealSpeed = rocket.calculateIdealMaximumVelocity()
+    print(f"Идеальная максимальная скорость (Циолковский): {idealSpeed:.1f} м/с")
+    simulator.runSimulation(rocket, gravity, atmosphere, aerodynamics, plot=True, saveCSV=True)
 
 if __name__ == "__main__":
     main()

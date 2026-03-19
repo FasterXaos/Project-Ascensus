@@ -1,3 +1,5 @@
+import math
+
 from typing import Optional
 
 class Rocket:
@@ -79,3 +81,26 @@ class Rocket:
 
         print(f"Ракета {self.name} успешно перезагружена. "
               f"Высота {'сброшена' if resetHeight else 'не изменена'}.")
+        
+    def calculateIdealMaximumVelocity(self) -> float:
+        """Расчёт максимальной идеальной скорости (Δv) по формуле Циолковского
+        для многоступенчатой ракеты в вакууме (без гравитации и сопротивления)."""
+
+        totalDeltaV = 0.0
+        upperMass = self.payloadMass
+
+        for stage in self.stages:
+            fullStageMass = stage.getFullStageMass()
+            dryStageMass = stage.structuralMass + stage.interstagePenalty
+
+            mInitial = fullStageMass + upperMass
+            mFinal = dryStageMass + upperMass
+
+            if mInitial > mFinal and stage.exhaustVelocity > 0:
+                stageDeltaV = stage.exhaustVelocity * math.log(mInitial / mFinal)
+                totalDeltaV += stageDeltaV
+
+            upperMass += fullStageMass
+
+        return totalDeltaV
+
