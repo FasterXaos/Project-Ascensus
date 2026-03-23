@@ -18,6 +18,7 @@ class Stage:
 
     def calculateBurnTime(self) -> float:
         """Время полного выгорания топлива ступени"""
+        
         return self.burnTime
 
     def updateFuelMassOverTime(self, timeStep: float) -> float:

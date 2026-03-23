@@ -1,7 +1,6 @@
 import numpy as np
-from typing import Optional
 
-from scipy.optimize import differential_evolution
+from scipy.optimize import differential_evolution, brute
 
 class RocketMassOptimizer:
     """Оптимизатор массы ракеты (минимизация полной массы при достижении целей)"""
@@ -13,27 +12,27 @@ class RocketMassOptimizer:
         self.aerodynamics = aerodynamics
 
     def _objectiveFunction(self, fuelMasses: list[float], targetVelocity: float,
-                           penaltyWeight: float = 1_000_000.0) -> float:
+                           penaltyWeight: float = 2_000_000.0) -> float:
         """Целевая функция: минимизируем полную массу + штраф за недостижение скорости"""
 
         self.rocket.initializeMassesFromFuelMasses(fuelMasses)
 
-        timeHistory, heightHistory, velocityHistory = self.simulator.runSimulation(
+        _, _, velocityHistory = self.simulator.runSimulation(
             self.rocket, self.gravity, self.atmosphere, self.aerodynamics, plot=False
         )
 
-        finalVelocity = velocityHistory[-1]
-        velNormError = abs(finalVelocity - targetVelocity) / targetVelocity
-
+        finalVelocity = velocityHistory[-1]    
+        velocityDeficit = targetVelocity - finalVelocity
         fullMass = self.rocket.getFullRocketMass()
-        penalty = penaltyWeight * (velNormError ** 2)
 
-        return fullMass + penalty
+        if finalVelocity < targetVelocity:
+            return 1e10 + velocityDeficit * 1e7
 
-    def optimize(self, initialFuelGuess: Optional[list[float]] = None,
-                 bounds: Optional[list[tuple[float, float]]] = None,
-                 targetVelocity: Optional[float] = None,
-                 maxiter: int = 200) -> dict:
+        return fullMass - 0.01 * velocityDeficit
+
+    def optimize(self, bounds: list[tuple[float, float]] | None = None,
+                 targetVelocity: float | None = None,
+                 maxiter: int = 500) -> dict:
         """Запуск оптимизации"""
 
         if targetVelocity is None:
@@ -41,10 +40,7 @@ class RocketMassOptimizer:
 
         if bounds is None:
             payload = self.rocket.payloadMass
-            bounds = [(payload, 2_000_000.0) for _ in self.rocket.stages]
-
-        if initialFuelGuess is None:
-            initialFuelGuess = [stage.fuelMass for stage in self.rocket.stages]
+            bounds = [(payload, 200_000.0) for _ in self.rocket.stages]
 
         result = differential_evolution(
             self._objectiveFunction,
@@ -52,8 +48,10 @@ class RocketMassOptimizer:
             args=(targetVelocity,),
             maxiter=maxiter,
             workers=-1,
-            updating="deferred"
+            updating="deferred",
+            popsize=15 * len(bounds)
         )
+        print(len(bounds))
 
         optimalFuelMasses = result.x.tolist()
         self.rocket.initializeMassesFromFuelMasses(optimalFuelMasses)
@@ -69,4 +67,52 @@ class RocketMassOptimizer:
             "minimalFullMass": finalMass,
             "success": result.success,
             "message": result.message
+        }
+    
+    def optimizeByBruteForce(self,
+                            bounds: list[tuple[float, float]] | None = None,
+                            targetVelocity: float | None = None,
+                            gridResolution: int = 20,
+                            finish: bool = True) -> dict:
+        """Брутфорс-перебор. Работает точно так же, как optimize(), но перебирает все комбинации по равномерной сетке."""
+
+        if targetVelocity is None:
+            targetVelocity = self.simulator.targetVelocity
+
+        if bounds is None:
+            payload = self.rocket.payloadMass
+            bounds = [(payload, 200_000.0) for _ in self.rocket.stages]
+
+        # Преобразуем границы в формат scipy.brute (slice с complex для равномерной сетки)
+        ranges = tuple(
+            slice(low, high, complex(0, gridResolution))
+            for low, high in bounds
+        )
+
+        result = brute(
+            self._objectiveFunction,
+            ranges=ranges,
+            args=(targetVelocity,),
+            finish=finish,
+            full_output=True,
+            workers=-1
+        )
+
+        optimalFuelMasses = np.atleast_1d(result[0]).tolist()
+        totalEvaluations = gridResolution ** len(bounds)
+
+        self.rocket.initializeMassesFromFuelMasses(optimalFuelMasses)
+        self.rocket.reloadRocket()
+
+        finalMass = self.rocket.getFullRocketMass()
+
+        print(f"Брутфорс-перебор завершён ({gridResolution}^{len(bounds)} = {totalEvaluations} точек)")
+        print(f"Минимальная полная масса: {finalMass:.2f} кг")
+        print(f"Оптимальные массы топлива: {[round(m, 1) for m in optimalFuelMasses]} кг")
+
+        return {
+            "optimalFuelMasses": optimalFuelMasses,
+            "minimalFullMass": finalMass,
+            "gridEvaluations": totalEvaluations,
+            "gridResolution": gridResolution
         }

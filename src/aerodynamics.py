@@ -6,4 +6,5 @@ class Aerodynamics:
 
     def calculateDragForce(self, velocity: float, airDensity: float) -> float:
         """Сила сопротивления воздуха"""
+        
         return 0.5 * self.dragCoefficient * airDensity * (velocity ** 2) * self.referenceArea

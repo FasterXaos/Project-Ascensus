@@ -1,7 +1,5 @@
 import math
 
-from typing import Optional
-
 class Rocket:
     """Класс ракеты"""
     def __init__(self, name: str, initialAltitude: float, payloadMass: float, stages: list):
@@ -15,35 +13,36 @@ class Rocket:
     def getCurrentRocketMass(self) -> float:
         """Текущая масса всей ракеты (учитывает отсоединённые ступени и расход топлива)"""
         activeMass = sum(stage.getCurrentStageMass() for stage in self.activeStages)
+
         return activeMass + self.payloadMass
     
     def getFullRocketMass(self) -> float:
         """Полная масса всей ракеты (все ступени активны + полное топливо в каждой)"""
         fullMass = sum(stage.getFullStageMass() for stage in self.stages)
+
         return fullMass + self.payloadMass
     
-    def setHeight(self, height: Optional[float] = None) -> None:
+    def setHeight(self, height: float | None = None) -> None:
         """Устанавливает текущую высоту ракеты.
         Если height=None — сбрасывает на initialAltitude (по умолчанию)"""
-        if height is None:
-            height = self.initialAltitude
-        self.currentHeight = height
+
+        self.currentHeight = height if height is not None else self.initialAltitude
 
     def initializeMassesFromFuelMasses(self, fuelMasses: list[float]) -> None:
         """Инициализирует fuelMass и structuralMass для каждой ступени по списку топлива.
         Полностью пересчитывает все зависимые поля ступени."""
-
+        
         if len(fuelMasses) != len(self.stages):
             raise ValueError(f"Список fuelMasses должен содержать {len(self.stages)} значений")
 
         for i, stage in enumerate(self.stages):
             fuelMass = fuelMasses[i]
-            sf = stage.structuralFraction
+            structuralFraction = stage.structuralFraction
 
-            if sf <= 0.0 or sf >= 1.0:
-                raise ValueError(f"Некорректный structuralFraction {sf} у ступени {stage.name}")
+            if structuralFraction <= 0.0 or structuralFraction >= 1.0:
+                raise ValueError(f"Некорректный structuralFraction {structuralFraction} у ступени {stage.name}")
 
-            structuralMass = (sf / (1.0 - sf)) * fuelMass
+            structuralMass = (structuralFraction / (1.0 - structuralFraction)) * fuelMass
 
             stage.fuelMass = fuelMass
             stage.structuralMass = structuralMass
@@ -62,10 +61,10 @@ class Rocket:
         if -len(self.activeStages) <= stageIndex < len(self.activeStages):
             detachedStage = self.activeStages.pop(stageIndex)
 
-            #print(
+            # print(
             #    f"Ступень {detachedStage.name} отсоединена. "
             #    f"Текущая масса ракеты: {self.getCurrentRocketMass():.2f} кг"
-            #)
+            # )
 
     def reloadRocket(self, resetHeight: bool = True) -> None:
         """Перезагрузка ракеты: полностью восстанавливает активные ступени и топливо.
@@ -103,4 +102,3 @@ class Rocket:
             upperMass += fullStageMass
 
         return totalDeltaV
-

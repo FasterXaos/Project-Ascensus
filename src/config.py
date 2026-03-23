@@ -1,5 +1,6 @@
 import json
 import math
+import os
 
 from .stage import Stage
 from .rocket import Rocket
@@ -18,13 +19,14 @@ def _calculateStageMasses(rocketName: str,
     massRatio = math.exp(stageDeltaV / exhaustVelocity)
 
     if massRatio <= 1.0:
-        raise ValueError("Mass ratio must be > 1")
+        raise ValueError("Массовое соотношение > 1")
 
     denominator = 1.0 - structuralFraction * massRatio
     if denominator <= 0:
-        print(f"Structural fraction of {rocketName} too large for given deltaV")
-        propellantMass = 100000
-        structuralMass = 100000
+        print(f"Структурный коэффициент {rocketName} слишком большой для данной deltaV")
+        print(f"Значение массы структуры и топливо установлены на 100000 кг.")
+        propellantMass = 100_000
+        structuralMass = 100_000
         initialMass = payloadMass + propellantMass + structuralMass
         return initialMass, propellantMass, structuralMass
 
@@ -75,7 +77,7 @@ def _calculateAllStageMasses(rocketName: str,
 
     return results
 
-def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
+def loadConfiguration(rocketConfigPath: str = "configs/rocket/TwoStageRocket.json",
                       simulationConfigPath: str = "configs/simulation/simulation.json",
                       planetConfigPath: str = "configs/planet/planet.json"):
     """Читает три отдельных JSON-конфига (ракета + симуляция + планета) и инициализирует все классы"""
@@ -91,6 +93,7 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
 
     rocketData = rocketConfigData["rocket"]
     stagesData = rocketData["stages"]
+    fuelMasses = rocketData.get("fuelMasses")
 
     calculatedStages = _calculateAllStageMasses(
         rocketName=rocketData["name"],
@@ -99,25 +102,56 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
         requiredDeltaV=simulationConfigData["target"]["velocity"] * 1.18
     )
 
-    stagesList = []
-    for calc in calculatedStages:
-        stage = Stage(
-            name=calc["name"],
-            fuelMass=calc["fuelMass"],
-            structuralMass=calc["structuralMass"],
-            exhaustVelocity=calc["exhaustVelocity"],
-            structuralFraction=calc["structuralFraction"],
-            interstagePenalty=calc["interstagePenalty"],
-            thrust=calc["thrust"]
-        )
-        stagesList.append(stage)
+    if fuelMasses is not None:
+        stagesList = []
+        for stageData in stagesData:
+            stage = Stage(
+                name=stageData["name"],
+                fuelMass=0.0,                    # временно
+                structuralMass=0.0,              # временно
+                exhaustVelocity=stageData["exhaustVelocity"],
+                structuralFraction=stageData["structuralFraction"],
+                interstagePenalty=stageData.get("interstagePenalty", 0.0),
+                thrust=stageData.get("thrust", 0.0)
+            )
+            stagesList.append(stage)
 
-    rocket = Rocket(
-        name=rocketData["name"],
-        initialAltitude=rocketData["initialAltitude"],
-        payloadMass=rocketData["payloadMass"],
-        stages=stagesList
-    )
+        rocket = Rocket(
+            name=rocketData["name"],
+            initialAltitude=rocketData["initialAltitude"],
+            payloadMass=rocketData["payloadMass"],
+            stages=stagesList
+        )
+
+        rocket.initializeMassesFromFuelMasses(fuelMasses)
+
+    else:
+        calculatedStages = _calculateAllStageMasses(
+            rocketName=rocketData["name"],
+            payloadMass=rocketData["payloadMass"],
+            stagesData=stagesData,
+            requiredDeltaV=simulationConfigData["target"]["velocity"] * 1.18
+        )
+
+        stagesList = []
+        for calc in calculatedStages:
+            stage = Stage(
+                name=calc["name"],
+                fuelMass=calc["fuelMass"],
+                structuralMass=calc["structuralMass"],
+                exhaustVelocity=calc["exhaustVelocity"],
+                structuralFraction=calc["structuralFraction"],
+                interstagePenalty=calc["interstagePenalty"],
+                thrust=calc["thrust"]
+            )
+            stagesList.append(stage)
+
+        rocket = Rocket(
+            name=rocketData["name"],
+            initialAltitude=rocketData["initialAltitude"],
+            payloadMass=rocketData["payloadMass"],
+            stages=stagesList
+        )
 
     simulator = Simulator(
         targetVelocity=simulationConfigData["target"]["velocity"],
@@ -131,7 +165,6 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
     )
 
     gravity = Gravity(
-        standardGravity=planetConfigData["gravity"]["standardGravity"],
         planetRadius=planetConfigData["gravity"]["planetRadius"],
         planetMass=planetConfigData["gravity"]["planetMass"],
         gConstant=planetConfigData["gravity"]["gConstant"]
@@ -149,3 +182,48 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TestRocket.json",
         "gravity": gravity,
         "aerodynamics": aerodynamics
     }
+
+def saveRocketConfigurationToMyConfigs(rocket: Rocket,
+                                       aerodynamics: Aerodynamics,
+                                       fileName: str | None = None,
+                                       saveDir: str = "myConfigs") -> str:
+    """Сохраняет ракету (вместе с актуальными массами топлива) в папку saveDir."""
+
+    if fileName is None:
+        fileName = f"{rocket.name.replace(' ', '_')}.json"
+
+    os.makedirs(saveDir, exist_ok=True)
+    savePath = os.path.join(saveDir, fileName)
+
+    rocketDict = {
+        "name": rocket.name,
+        "initialAltitude": rocket.initialAltitude,
+        "payloadMass": rocket.payloadMass,
+        "stages": [
+            {
+                "name": stage.name,
+                "structuralFraction": stage.structuralFraction,
+                "exhaustVelocity": stage.exhaustVelocity,
+                "interstagePenalty": stage.interstagePenalty,
+                "thrust": stage.thrust
+            }
+            for stage in rocket.stages
+        ],
+        "fuelMasses": [stage.fuelMass for stage in rocket.stages]
+    }
+
+    aerodynamicsDict = {
+        "dragCoefficient": aerodynamics.dragCoefficient,
+        "referenceArea": aerodynamics.referenceArea
+    }
+
+    fullConfig = {
+        "rocket": rocketDict,
+        "aerodynamics": aerodynamicsDict
+    }
+
+    with open(savePath, "w", encoding="utf-8") as file:
+        json.dump(fullConfig, file, indent=4, ensure_ascii=False)
+
+    print(f"Ракета успешно сохранена в myConfigs: {savePath}")
+    return savePath
