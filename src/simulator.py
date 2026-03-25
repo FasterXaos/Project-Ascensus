@@ -140,7 +140,7 @@ class Simulator:
             maxheight = heightHistory[-1]
             maxTime = timeHistory[-1]
 
-            axs[0].plot(maxTime, maxheight, 'g*', markersize=14, label=f'Макс. скорость: {maxheight:.0f} м/с')
+            axs[0].plot(maxTime, maxheight, 'g*', markersize=14, label=f'Макс. высота: {maxheight:.0f} м/с')
             axs[0].annotate(f'{maxheight:.0f}',
                             xy=(maxTime, maxheight),
                             xytext=(maxTime + maxTime * 0.01, maxheight + maxheight * 0.01),

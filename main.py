@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 from src.config import loadConfiguration, saveRocketConfigurationToMyConfigs
-from src.optimizer import RocketMassOptimizer
+from src.optimizer import RocketOptimizer
 from src.rocket import Rocket
 from src.simulator import Simulator
 
@@ -13,20 +13,20 @@ def main():
         "configs/rocket/ThreeStageRocket.json",
         "configs/rocket/FourStageRocket.json",
     ]
+    rocketIndex = 3
 
-    config = loadConfiguration(presets[2])
+    config = loadConfiguration(presets[rocketIndex])
     rocket = config["rocket"]
     simulator = config["simulator"]
     atmosphere = config["atmosphere"]
     gravity = config["gravity"]
     aerodynamics = config["aerodynamics"]
 
-    optimizer = RocketMassOptimizer(rocket, simulator, atmosphere, gravity, aerodynamics)
+    optimizer = RocketOptimizer(rocket, simulator, atmosphere, gravity, aerodynamics)
 
     result = optimizer.optimize(
         bounds=None,
-        targetVelocity=6000,
-        maxiter=300
+        maxiter=500
     )
 
     optimalFuelMasses = result["optimalFuelMasses"]
@@ -39,26 +39,23 @@ def main():
     simulator.runSimulation(rocket, gravity, atmosphere, aerodynamics, plot=True, saveCSV=True, savePlot=True)
 
 
-    # resultBrute = optimizer.optimizeByBruteForce(
-    # gridResolution=30,
-    # finish=True
-    # )
+    resultBrute = optimizer.optimizeByBruteForce(gridResolution=10)
 
-    # optimalFuelMasses = resultBrute["optimalFuelMasses"]
-    # rocket.initializeMassesFromFuelMasses(optimalFuelMasses)
-    # rocket.reloadRocket()
-    # rocket.name = rocket.name + '-opt_brute'
+    optimalFuelMasses = resultBrute["optimalFuelMasses"]
+    rocket.initializeMassesFromFuelMasses(optimalFuelMasses)
+    rocket.reloadRocket()
+    rocket.name = rocket.name + '-brute'
 
-    # idealSpeed = rocket.calculateIdealMaximumVelocity()
-    # print(f"Идеальная максимальная скорость (Циолковский): {idealSpeed:.1f} м/с")
-    # simulator.runSimulation(rocket, gravity, atmosphere, aerodynamics, plot=True, saveCSV=True, savePlot=True)
+    idealSpeed = rocket.calculateIdealMaximumVelocity()
+    print(f"Идеальная максимальная скорость (Циолковский): {idealSpeed:.1f} м/с")
+    simulator.runSimulation(rocket, gravity, atmosphere, aerodynamics, plot=True, saveCSV=True, savePlot=True)
 
-    # print("Сравнение масс:")
-    # print("DE   :", result["optimalFuelMasses"])
-    # print("Brute:", resultBrute["optimalFuelMasses"])
+    print("Сравнение масс:")
+    print("DE   :", result["optimalFuelMasses"])
+    print("Brute:", resultBrute["optimalFuelMasses"])
 
 
-    config = loadConfiguration(presets[2])
+    config = loadConfiguration(presets[rocketIndex])
     rocket = config["rocket"]
     simulator = config["simulator"]
     atmosphere = config["atmosphere"]
@@ -68,7 +65,7 @@ def main():
     idealSpeed = rocket.calculateIdealMaximumVelocity()
     print(f"Идеальная максимальная скорость (Циолковский): {idealSpeed:.1f} м/с")
     simulator.runSimulation(rocket, gravity, atmosphere, aerodynamics, plot=True, saveCSV=True, savePlot=True)
-    print(f"Масса ракеты (Циолковский): {rocket.getFullRocketMass():.1f} м/с")
+    print(f"Масса ракеты (Циолковский): {rocket.getFullRocketMass():.1f} кг")
 
     # saveRocketConfigurationToMyConfigs(
     #     rocket=config["rocket"],

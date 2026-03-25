@@ -24,9 +24,9 @@ def _calculateStageMasses(rocketName: str,
     denominator = 1.0 - structuralFraction * massRatio
     if denominator <= 0:
         print(f"Структурный коэффициент {rocketName} слишком большой для данной deltaV")
-        print(f"Значение массы структуры и топливо установлены на 100000 кг.")
-        propellantMass = 100_000
-        structuralMass = 100_000
+        print(f"Значение массы структуры и топлива установлены на 15000 и 150000 кг соответственно.")
+        propellantMass = 150_000
+        structuralMass = 15_000
         initialMass = payloadMass + propellantMass + structuralMass
         return initialMass, propellantMass, structuralMass
 
