@@ -4,6 +4,6 @@
   },
   "simulation": {
     "timeStep": 0.1,
-    "maxTime": 500.0
+    "maxTime": 1000.0
   }
 }

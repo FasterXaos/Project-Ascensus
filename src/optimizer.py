@@ -36,7 +36,7 @@ class RocketOptimizer:
 
         if bounds is None:
             payload = self.rocket.payloadMass
-            bounds = [(payload, 200_000.0) for _ in self.rocket.stages]
+            bounds = [(payload, 500_000.0) for _ in self.rocket.stages]
 
         result = differential_evolution(
             self._objectiveFunction,

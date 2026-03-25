@@ -6,15 +6,15 @@
     "stages": [
       {
         "name": "Stage1",
-        "structuralFraction": 0.09,
-        "exhaustVelocity": 3100.0,
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 4000.0,
         "interstagePenalty": 0.0,
-        "thrust": 3200000.0
+        "thrust": 5000000.0
       }
     ]
   },
   "aerodynamics": {
-	  "dragCoefficient": 0.5,
+	  "dragCoefficient": 0.35,
 	  "referenceArea": 20.0
   }
 }

@@ -4,13 +4,13 @@
     "initialAltitude": 0.0,
     "payloadMass": 5000.0,
     "stages": [
-      { "name": "Stage3", "structuralFraction": 0.13, "exhaustVelocity": 3100.0, "interstagePenalty": 600.0, "thrust": 900000.0 },
-      { "name": "Stage2", "structuralFraction": 0.11, "exhaustVelocity": 2950.0, "interstagePenalty": 300.0, "thrust": 1800000.0 },
-      { "name": "Stage1", "structuralFraction": 0.09, "exhaustVelocity": 2800.0, "interstagePenalty": 0.0, "thrust": 3200000.0 }
+      { "name": "Stage3", "structuralFraction": 0.05, "exhaustVelocity": 4500.0, "interstagePenalty": 600.0, "thrust": 400000.0 },
+      { "name": "Stage2", "structuralFraction": 0.06, "exhaustVelocity": 3600.0, "interstagePenalty": 300.0, "thrust": 1200000.0 },
+      { "name": "Stage1", "structuralFraction": 0.07, "exhaustVelocity": 3100.0, "interstagePenalty": 0.0, "thrust": 4000000.0 }
     ]
   },
   "aerodynamics": {
-	  "dragCoefficient": 0.5,
+	  "dragCoefficient": 0.35,
 	  "referenceArea": 20.0
   }
 }

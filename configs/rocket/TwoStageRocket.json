@@ -1,27 +1,15 @@
 {
   "rocket": {
-    "name": "TestRocket",
+    "name": "TwoRocket",
     "initialAltitude": 0.0,
     "payloadMass": 5000.0,
     "stages": [
-      {
-        "name": "Stage2",
-        "structuralFraction": 0.12,
-        "exhaustVelocity": 3000.0,
-        "interstagePenalty": 800.0,
-        "thrust": 1500000.0
-      },
-      {
-        "name": "Stage1",
-        "structuralFraction": 0.10,
-        "exhaustVelocity": 2800.0,
-        "interstagePenalty": 0.0,
-        "thrust": 2500000.0
-      }
+      {"name": "Stage2", "structuralFraction": 0.05, "exhaustVelocity": 3000.0, "interstagePenalty": 800.0, "thrust": 1500000.0},
+      {"name": "Stage1", "structuralFraction": 0.06, "exhaustVelocity": 2800.0, "interstagePenalty": 0.0, "thrust": 2500000.0}
     ]
   },
   "aerodynamics": {
-    "dragCoefficient": 0.5,
+    "dragCoefficient": 0.35,
     "referenceArea": 20.0
   }
 }

@@ -44,3 +44,12 @@ class Stage:
     def getFullStageMass(self) -> float:
         """Полная масса ступени при полном топливе"""
         return self.structuralMass + self.fuelMass + self.interstagePenalty
+
+    def updateThrustAndExhaustVelocity(self, newThrust: float, newExhaustVelocity: float):
+        """Обновляет тягу и скорость истечения газов ступени"""
+        self.thrust = newThrust
+        self.exhaustVelocity = newExhaustVelocity
+        
+        if self.fuelMass > 0 and newExhaustVelocity > 0:
+            self.massFlowRate = newThrust / newExhaustVelocity if newThrust > 0 else 0.0
+            self.burnTime = self.fuelMass / self.massFlowRate if self.massFlowRate > 0 else 0.0

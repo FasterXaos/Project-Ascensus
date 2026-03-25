@@ -173,5 +173,8 @@ class Simulator:
 
         if savePath:
             plt.savefig(savePath, dpi=300, bbox_inches='tight')
+
         if show:
             plt.show()
+        else:
+            plt.close(fig)
