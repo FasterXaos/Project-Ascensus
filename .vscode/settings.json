@@ -1,6 +1,6 @@
 {
-  "python.analysis.extraPaths": ["./src"],
-  "python.autoComplete.extraPaths": ["./src"],
+  "python.analysis.extraPaths": ["./src", "./src/utils"],
+  "python.autoComplete.extraPaths": ["./src", "./src/utils"],
   "python.analysis.typeCheckingMode": "basic",
   "python.languageServer": "Pylance"
 }

@@ -45,10 +45,10 @@ class Stage:
         """Полная масса ступени при полном топливе"""
         return self.structuralMass + self.fuelMass + self.interstagePenalty
 
-    def updateThrustAndExhaustVelocity(self, newThrust: float, newExhaustVelocity: float):
+    def updateThrustAndExhaustVelocity(self, newExhaustVelocity: float, newThrust: float):
         """Обновляет тягу и скорость истечения газов ступени"""
-        self.thrust = newThrust
         self.exhaustVelocity = newExhaustVelocity
+        self.thrust = newThrust
         
         if self.fuelMass > 0 and newExhaustVelocity > 0:
             self.massFlowRate = newThrust / newExhaustVelocity if newThrust > 0 else 0.0

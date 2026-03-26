@@ -48,7 +48,7 @@ class RocketOptimizer:
             popsize=15 * len(bounds)
         )
 
-        optimalFuelMasses = result.x.tolist()
+        optimalFuelMasses: list[float] = result.x.tolist()
         self.rocket.initializeMassesFromFuelMasses(optimalFuelMasses)
         self.rocket.reloadRocket()
 
