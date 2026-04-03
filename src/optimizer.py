@@ -5,12 +5,13 @@ from scipy.optimize import differential_evolution, brute
 
 class RocketOptimizer:
     """Оптимизатор массы ракеты (минимизация полной массы при достижении целей)"""
-    def __init__(self, rocket, simulator, atmosphere, gravity, aerodynamics):
+    def __init__(self, rocket, simulator, atmosphere, gravity, aerodynamics, integrationMethod: str = "euler"):
         self.rocket = rocket
         self.simulator = simulator
         self.atmosphere = atmosphere
         self.gravity = gravity
         self.aerodynamics = aerodynamics
+        self.integrationMethod = integrationMethod.lower()
 
     def _objectiveFunction(self, fuelMasses: list[float], targetVelocity: float) -> float:
         """Целевая функция: максимизирует финальную скорость ракеты"""
@@ -19,7 +20,8 @@ class RocketOptimizer:
         rocket.initializeMassesFromFuelMasses(fuelMasses)
 
         _, _, velocityHistory = self.simulator.runSimulation(
-            rocket, self.gravity, self.atmosphere, self.aerodynamics, plot=False
+            rocket, self.gravity, self.atmosphere, self.aerodynamics,
+            plot=False, integrationMethod=self.integrationMethod
         )
 
         finalVelocity = velocityHistory[-1]    

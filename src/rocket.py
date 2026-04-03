@@ -46,7 +46,7 @@ class Rocket:
 
             stage.fuelMass = fuelMass
             stage.structuralMass = structuralMass
-            stage.massFlowRate = stage.thrust / stage.exhaustVelocity if stage.thrust > 0 else 0.0
+            stage.massFlowRate = stage.vacuumThrust / stage.exhaustVelocity if stage.vacuumThrust > 0 else 0.0
             stage.currentFuelMass = stage.fuelMass
             stage.burnTime = stage.fuelMass / stage.massFlowRate if stage.massFlowRate > 0 else 0.0
 

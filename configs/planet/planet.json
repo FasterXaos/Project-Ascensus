@@ -1,6 +1,7 @@
 {
   "atmosphere": {
     "seaLevelDensity": 1.225,
+    "seaLevelPressure": 101325.0,
     "scaleHeight": 8500.0
   },
   "gravity": {

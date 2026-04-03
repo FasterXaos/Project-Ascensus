@@ -70,7 +70,8 @@ def _calculateAllStageMasses(rocketName: str,
             "exhaustVelocity": exhaustVelocity,
             "structuralFraction": structuralFraction,
             "interstagePenalty": interstagePenalty,
-            "thrust": stageData.get("thrust", 0.0)
+            "seaLevelThrust": stageData.get("seaLevelThrust", 0.0),
+            "vacuumThrust": stageData.get("vacuumThrust", 0.0)
         })
 
         currentUpperMass = initialMass + interstagePenalty
@@ -112,7 +113,8 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TwoStageRocket.jso
                 exhaustVelocity=stageData["exhaustVelocity"],
                 structuralFraction=stageData["structuralFraction"],
                 interstagePenalty=stageData.get("interstagePenalty", 0.0),
-                thrust=stageData.get("thrust", 0.0)
+                seaLevelThrust=stageData.get("seaLevelThrust", 0.0),
+                vacuumThrust=stageData.get("vacuumThrust", 0.0)
             )
             stagesList.append(stage)
 
@@ -142,7 +144,8 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TwoStageRocket.jso
                 exhaustVelocity=calc["exhaustVelocity"],
                 structuralFraction=calc["structuralFraction"],
                 interstagePenalty=calc["interstagePenalty"],
-                thrust=calc["thrust"]
+                seaLevelThrust=calc["seaLevelThrust"],
+                vacuumThrust=calc["vacuumThrust"]
             )
             stagesList.append(stage)
 
@@ -161,6 +164,7 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TwoStageRocket.jso
 
     atmosphere = Atmosphere(
         seaLevelDensity=planetConfigData["atmosphere"]["seaLevelDensity"],
+        seaLevelPressure=planetConfigData["atmosphere"]["seaLevelPressure"],
         scaleHeight=planetConfigData["atmosphere"]["scaleHeight"],
     )
 
@@ -205,7 +209,8 @@ def saveRocketConfigurationToMyConfigs(rocket: Rocket,
                 "structuralFraction": stage.structuralFraction,
                 "exhaustVelocity": stage.exhaustVelocity,
                 "interstagePenalty": stage.interstagePenalty,
-                "thrust": stage.thrust
+                "seaLevelThrust": stage.seaLevelThrust,
+                "vacuumThrust": stage.vacuumThrust
             }
             for stage in rocket.stages
         ],

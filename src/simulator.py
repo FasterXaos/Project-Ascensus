@@ -15,8 +15,10 @@ class Simulator:
     def runSimulation(self, rocket, gravity, atmosphere,
                       aerodynamics, plot: bool = False,
                       saveCSV: bool = False,
-                      savePlot: bool = False):
-        """Запускает 1D симуляцию полёта ракеты"""
+                      savePlot: bool = False,
+                      integrationMethod: str = "rk4"):
+        """Запускает 1D симуляцию полёта ракеты.
+        Методы интегрирования: 'euler' (по умолчанию) или 'rk4'"""
 
         if saveCSV:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -55,7 +57,8 @@ class Simulator:
                     rocket.detachStage(-1)
                     continue
 
-                thrust = activeStage.updateFuelMassOverTime(self.timeStep)
+                # Обновляем топливо и получаем thrust за полный шаг
+                thrust = activeStage.updateFuelMassOverTime(self.timeStep, atmosphere, height)
 
             else:
                 break
@@ -68,10 +71,61 @@ class Simulator:
             dragMagnitude = aerodynamics.calculateDragForce(velocity, airDensity)
             drag = math.copysign(dragMagnitude, velocity) if velocity != 0 else 0.0
 
-            acceleration = (thrust - drag - rocketMass * g) / rocketMass
+            if integrationMethod.lower() == "euler":
+                acceleration = (thrust - drag - rocketMass * g) / rocketMass
+                velocity += acceleration * self.timeStep
+                height += velocity * self.timeStep
 
-            velocity += acceleration * self.timeStep
-            height += velocity * self.timeStep
+            elif integrationMethod.lower() in ("runge_kutta", "rk4"):
+                # k1
+                k1Height = velocity
+                a1 = (thrust - drag - rocketMass * g) / rocketMass
+                k1Velocity = a1
+
+                # k2
+                intermediateHeightK2 = height + 0.5 * self.timeStep * k1Height
+                intermediateVelocityK2 = velocity + 0.5 * self.timeStep * k1Velocity
+
+                gK2 = gravity.getGravityAtHeight(intermediateHeightK2)
+                airDensityK2 = atmosphere.getAirDensityAtHeight(intermediateHeightK2)
+                dragMagnitudeK2 = aerodynamics.calculateDragForce(intermediateVelocityK2, airDensityK2)
+                dragK2 = math.copysign(dragMagnitudeK2, intermediateVelocityK2) if intermediateVelocityK2 != 0 else 0.0
+                aK2 = (thrust - dragK2 - rocketMass * gK2) / rocketMass
+
+                k2Height = intermediateVelocityK2
+                k2Velocity = aK2
+
+                # k3
+                intermediateHeightK3 = height + 0.5 * self.timeStep * k2Height
+                intermediateVelocityK3 = velocity + 0.5 * self.timeStep * k2Velocity
+
+                gK3 = gravity.getGravityAtHeight(intermediateHeightK3)
+                airDensityK3 = atmosphere.getAirDensityAtHeight(intermediateHeightK3)
+                dragMagnitudeK3 = aerodynamics.calculateDragForce(intermediateVelocityK3, airDensityK3)
+                dragK3 = math.copysign(dragMagnitudeK3, intermediateVelocityK3) if intermediateVelocityK3 != 0 else 0.0
+                aK3 = (thrust - dragK3 - rocketMass * gK3) / rocketMass
+
+                k3Height = intermediateVelocityK3
+                k3Velocity = aK3
+
+                # k4
+                intermediateHeightK4 = height + self.timeStep * k3Height
+                intermediateVelocityK4 = velocity + self.timeStep * k3Velocity
+
+                gK4 = gravity.getGravityAtHeight(intermediateHeightK4)
+                airDensityK4 = atmosphere.getAirDensityAtHeight(intermediateHeightK4)
+                dragMagnitudeK4 = aerodynamics.calculateDragForce(intermediateVelocityK4, airDensityK4)
+                dragK4 = math.copysign(dragMagnitudeK4, intermediateVelocityK4) if intermediateVelocityK4 != 0 else 0.0
+                aK4 = (thrust - dragK4 - rocketMass * gK4) / rocketMass
+
+                k4Height = intermediateVelocityK4
+                k4Velocity = aK4
+
+                height += (self.timeStep / 6.0) * (k1Height + 2.0 * k2Height + 2.0 * k3Height + k4Height)
+                velocity += (self.timeStep / 6.0) * (k1Velocity + 2.0 * k2Velocity + 2.0 * k3Velocity + k4Velocity)
+
+            else:
+                raise ValueError(f"Unsupported integrationMethod '{integrationMethod}'. Use 'euler' or 'rk4'.")
 
             if height < 0.0:
                 height = 0.0

@@ -9,7 +9,8 @@
         "structuralFraction": 0.06,
         "exhaustVelocity": 4000.0,
         "interstagePenalty": 0.0,
-        "thrust": 5000000.0
+        "seaLevelThrust": 5000000.0,
+        "vacuumThrust": 5750000.0
       }
     ]
   },

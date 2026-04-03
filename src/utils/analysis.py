@@ -61,8 +61,8 @@ def plotMultipleRocketSimulations(
         plt.close(fig)
 
 def runThrustExhaustVelocityGridAnalysis(
-    thrustValues: list[float],
     exhaustVelocityValues: list[float],
+    thrustPairs: list[tuple[float, float]],
     rocketConfigPath: str = "configs/rocket/OneStageRocket.json",
     baseVeRatios: list[float] | None = None,
     baseThrustRatios: list[float] | None = None,
@@ -70,7 +70,8 @@ def runThrustExhaustVelocityGridAnalysis(
     saveConfigs: bool = True,
     saveCommonPlot: bool = True,
     saveCommonTable: bool = True,
-    commonPlotShow: bool = True
+    commonPlotShow: bool = True,
+    integrationMethod: str = "euler"
 ):
     """
     1. Загружает ракету (одно- или многоступенчатую).
@@ -79,7 +80,7 @@ def runThrustExhaustVelocityGridAnalysis(
     4. В конце — общий график и таблица.
     """
 
-    print(f"Запуск анализа по сетке: {len(thrustValues)} значений тяги * {len(exhaustVelocityValues)} значений Ve")
+    print(f"Запуск анализа по сетке: {len(thrustPairs)} значений тяги * {len(exhaustVelocityValues)} значений Ve")
 
     config = loadConfiguration(rocketConfigPath)
     originalRocket = config["rocket"]
@@ -104,20 +105,22 @@ def runThrustExhaustVelocityGridAnalysis(
 
     simulationDataList = []
 
-    for ve, thrust in product(exhaustVelocityValues, thrustValues):
+    for ve, (seaLevelThrust, vacuumThrust) in product(exhaustVelocityValues, thrustPairs):
         rocketCopy = copy.deepcopy(originalRocket)
 
         for idx, stage in enumerate(reversed(rocketCopy.stages)):
             thisVe = ve * baseVeRatios[idx]
-            thisThrust = thrust * baseThrustRatios[idx]
-            stage.updateThrustAndExhaustVelocity(thisVe, thisThrust)
+            thisSeaLevelThrust = seaLevelThrust * baseThrustRatios[idx]
+            thisVacuumThrust = vacuumThrust * baseThrustRatios[idx]
+            stage.updateThrustAndExhaustVelocity(thisVe, thisSeaLevelThrust, thisVacuumThrust)
 
         shortVe = f"{ve / 1000 :.1f}km_s"
-        shortThrust = f"{thrust / 1000 :.0f}kN"
-        rocketCopy.name = f"{originalRocket.name}—Ve{shortVe}—T{shortThrust}"
+        shortSeaLevelThrust = f"{seaLevelThrust / 1000 :.0f}kN(sl)"
+        shortVacuumThrust = f"{vacuumThrust / 1000 :.0f}kN(v)"
+        rocketCopy.name = f"{originalRocket.name}—Ve{shortVe}—T{shortSeaLevelThrust}_{shortVacuumThrust}"
         print(f"- Запуск оптимизации и симуляции для {rocketCopy.name}")
 
-        optimizer = RocketOptimizer(rocketCopy, simulator, atmosphere, gravity, aerodynamics)
+        optimizer = RocketOptimizer(rocketCopy, simulator, atmosphere, gravity, aerodynamics, integrationMethod)
         result = optimizer.optimize(maxiter=300)
 
         shortRocketMass = f"{rocketCopy.getFullRocketMass() / 1000.0 :.0f}t"
@@ -130,7 +133,8 @@ def runThrustExhaustVelocityGridAnalysis(
             aerodynamics,
             plot=False,
             saveCSV=False,
-            savePlot=saveIndividualPlots
+            savePlot=saveIndividualPlots, 
+            integrationMethod=integrationMethod
         )
 
         if saveConfigs:
@@ -177,7 +181,8 @@ def runSingleRocketOptimizationComparison(
     gridResolutionForBruteForce: int = 10,
     plot: bool = True,
     savePlot: bool = True,
-    saveCsv: bool = True
+    saveCsv: bool = True,
+    integrationMethod: str = "euler"
 ):
     """
     Выполняет оптимизацию одной ракеты:
@@ -193,7 +198,7 @@ def runSingleRocketOptimizationComparison(
     gravity = config["gravity"]
     aerodynamics = config["aerodynamics"]
 
-    optimizer = RocketOptimizer(rocket, simulator, atmosphere, gravity, aerodynamics)
+    optimizer = RocketOptimizer(rocket, simulator, atmosphere, gravity, aerodynamics, integrationMethod)
 
     # === Differential Evolution ===
     differentialEvolutionResult = optimizer.optimize(
@@ -209,7 +214,8 @@ def runSingleRocketOptimizationComparison(
     print(f"Идеальная максимальная скорость (Циолковский) после DE: {idealSpeedDe:.1f} м/с")
     simulator.runSimulation(
         rocket, gravity, atmosphere, aerodynamics,
-        plot=plot, saveCSV=saveCsv, savePlot=savePlot
+        plot=plot, saveCSV=saveCsv, savePlot=savePlot, 
+            integrationMethod=integrationMethod
     )
 
     # === Brute Force ===
@@ -223,10 +229,11 @@ def runSingleRocketOptimizationComparison(
     print(f"Идеальная максимальная скорость (Циолковский) после BruteForce: {idealSpeedBrute:.1f} м/с")
     simulator.runSimulation(
         rocket, gravity, atmosphere, aerodynamics,
-        plot=plot, saveCSV=saveCsv, savePlot=savePlot
+        plot=plot, saveCSV=saveCsv, savePlot=savePlot, 
+            integrationMethod=integrationMethod
     )
 
     # === Comparison ===
     print("Сравнение масс оптимального топлива:")
-    print("DE     :", differentialEvolutionResult["optimalFuelMasses"])
-    print("Brute  :", bruteForceResult["optimalFuelMasses"])
+    print(f"DE     : {[f"{mass:.1f}" for mass in differentialEvolutionResult["optimalFuelMasses"]]} кг")
+    print(f"Brute  : {[f"{mass:.1f}" for mass in bruteForceResult["optimalFuelMasses"]]} кг")
