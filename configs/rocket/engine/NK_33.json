@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "NK-33_(1969)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "NK-33",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 2914.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 1510000.0,
+        "vacuumThrust": 1680000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+    "dragCoefficient": 0.35,
+    "referenceArea": 20
+  }
+}

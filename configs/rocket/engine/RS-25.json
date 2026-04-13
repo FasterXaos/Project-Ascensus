@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "RS-25_(1981)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "RS-25",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 3561.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 1779000.0,
+        "vacuumThrust": 2183000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

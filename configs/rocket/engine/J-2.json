@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "J-2_(1967)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "J-2",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 2000.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 890000.0,
+        "vacuumThrust": 1019000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

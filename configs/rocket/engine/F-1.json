@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "F-1_(1967)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "F-1",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 2580.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 6668000.0,
+        "vacuumThrust": 7551000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

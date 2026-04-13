@@ -1,6 +1,7 @@
 from src.utils.analysis import (
     runThrustExhaustVelocityGridAnalysis,
-    runSingleRocketOptimizationComparison
+    runSingleRocketOptimizationComparison,
+    runEngineAnalysis,
 )
 from src.optimizer import RocketOptimizer
 from src.config import loadConfiguration
@@ -14,6 +15,33 @@ if __name__ == "__main__":
     ]
     rocketIndex = 0
 
+    enginePresets = [
+        "configs/rocket/engine/V-2.json",
+        "configs/rocket/engine/RD-107.json",
+        "configs/rocket/engine/F-1.json",
+        "configs/rocket/engine/NK_33.json",
+        # "configs/rocket/engine/J-2.json",     # upper-stage
+        # "configs/rocket/engine/RS-25.json",   # core
+        "configs/rocket/engine/RD-170.json",
+        "configs/rocket/engine/RD-180.json",
+        "configs/rocket/engine/RD-191.json",
+        "configs/rocket/engine/Merlin_1D.json",
+        "configs/rocket/engine/YF-100.json",
+        "configs/rocket/engine/BE-4.json",
+        "configs/rocket/engine/Raptor_3.json",
+    ]
+    engineIndex = 0
+
+    runEngineAnalysis(
+        enginePresetPaths=enginePresets,
+        saveIndividualPlots=False,
+        saveConfigs=False,
+        saveCommonPlot=True,
+        saveCommonTable=True,
+        commonPlotShow=True,
+        integrationMethod="rk4"
+    )
+
     # # === Симуляция одной ракеты ===
     # config = loadConfiguration(presets[0])
     # rocket = config["rocket"]
@@ -21,8 +49,6 @@ if __name__ == "__main__":
     # atmosphere = config["atmosphere"]
     # gravity = config["gravity"]
     # aerodynamics = config["aerodynamics"]
-
-    # optimizer = RocketOptimizer(rocket, simulator, atmosphere, gravity, aerodynamics)
 
     # simulator.runSimulation(
     #     rocket, gravity, atmosphere, aerodynamics,

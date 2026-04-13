@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "RD-170_(1985)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "RD-170",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 3036.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 7257000.0,
+        "vacuumThrust": 7906000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

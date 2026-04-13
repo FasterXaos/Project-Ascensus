@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "YF-100_(2015)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "YF-100",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 2943.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 1200000.0,
+        "vacuumThrust": 1340000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

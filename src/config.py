@@ -96,13 +96,6 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TwoStageRocket.jso
     stagesData = rocketData["stages"]
     fuelMasses = rocketData.get("fuelMasses")
 
-    calculatedStages = _calculateAllStageMasses(
-        rocketName=rocketData["name"],
-        payloadMass=rocketData["payloadMass"],
-        stagesData=stagesData,
-        requiredDeltaV=simulationConfigData["target"]["velocity"] * 1.18
-    )
-
     if fuelMasses is not None:
         stagesList = []
         for stageData in stagesData:

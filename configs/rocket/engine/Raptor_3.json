@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "Raptor_3_(2026)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "Raptor_3",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 3433.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 2749000.0,
+        "vacuumThrust": 2941000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

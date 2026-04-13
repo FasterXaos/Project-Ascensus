@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "RD-180_(2000)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "RD-180",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 3050.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 3826000.0,
+        "vacuumThrust": 4148000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

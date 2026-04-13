@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "BE-4_(2026)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "BE-4",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 3336.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 2847000.0,
+        "vacuumThrust": 2847000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

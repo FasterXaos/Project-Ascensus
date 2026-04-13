@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "RD-107_(1957)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "RD-107",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 2580.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 814000.0,
+        "vacuumThrust": 1000000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

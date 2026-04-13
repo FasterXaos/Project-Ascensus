@@ -1,0 +1,21 @@
+{
+  "rocket": {
+    "name": "Merlin_1D_(2013)",
+    "initialAltitude": 0.0,
+    "payloadMass": 1000.0,
+    "stages": [
+      {
+        "name": "Merlin_1D",
+        "structuralFraction": 0.06,
+        "exhaustVelocity": 2766.0,
+        "interstagePenalty": 0.0,
+        "seaLevelThrust": 845000.0,
+        "vacuumThrust": 981000.0
+      }
+    ]
+  },
+  "aerodynamics": {
+	  "dragCoefficient": 0.35,
+	  "referenceArea": 20
+  }
+}

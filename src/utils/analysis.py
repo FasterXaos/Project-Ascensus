@@ -10,13 +10,14 @@ import matplotlib.pyplot as plt
 from src.config import loadConfiguration, saveRocketConfigurationToMyConfigs
 from src.optimizer import RocketOptimizer
 
+
 def plotMultipleRocketSimulations(
     simulationDataList: list[tuple[str, float, list, list, list]],
     targetVelocity: float,
     savePath: str | None = None,
     show: bool = True
 ):
-    """Выводит все симуляции на одном рисунке для сравнения grid-анализа."""
+    """Выводит несколько симуляций на одном рисунке."""
     
     if not simulationDataList:
         print("Нет данных для общего графика")
@@ -59,6 +60,7 @@ def plotMultipleRocketSimulations(
         plt.show()
     else:
         plt.close(fig)
+
 
 def runThrustExhaustVelocityGridAnalysis(
     exhaustVelocityValues: list[float],
@@ -163,7 +165,14 @@ def runThrustExhaustVelocityGridAnalysis(
         tablePath = f"results/tables/grid_results_{timestamp}.csv"
         with open(tablePath, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(["rocket_name", "rocket_mass_kg", "final_time_s", "final_height_m", "final_velocity_m_s", "target_velocity_m_s"])
+            writer.writerow([
+                "rocket_name",
+                "rocket_mass_kg",
+                "final_time_s",
+                "final_height_m",
+                "final_velocity_m_s",
+                "target_velocity_m_s"
+            ])
             
             for name, mass, timeHist, heightHist, velHist in simulationDataList:
                 finalT= timeHist[-1] if timeHist else 0.0
@@ -174,6 +183,7 @@ def runThrustExhaustVelocityGridAnalysis(
         print(f"Таблица результатов сохранена: {tablePath}")
 
     print(f"Анализ сетки завершён. Обработано {len(simulationDataList)} симуляций.")
+
 
 def runSingleRocketOptimizationComparison(
     rocketConfigPath: str = "configs/rocket/OneStageRocket.json",
@@ -237,3 +247,110 @@ def runSingleRocketOptimizationComparison(
     print("Сравнение масс оптимального топлива:")
     print(f"DE     : {[f"{mass:.1f}" for mass in differentialEvolutionResult["optimalFuelMasses"]]} кг")
     print(f"Brute  : {[f"{mass:.1f}" for mass in bruteForceResult["optimalFuelMasses"]]} кг")
+
+
+def runEngineAnalysis(
+    enginePresetPaths: list[str],
+    saveIndividualPlots: bool = False,
+    saveConfigs: bool = False,
+    saveCommonPlot: bool = True,
+    saveCommonTable: bool = True,
+    commonPlotShow: bool = True,
+    integrationMethod: str = "euler"
+):
+    """
+    Анализирует список пресетов ракет (одноступенчатые ракеты с разными двигателями).
+    1. Загружает конфигурацию.
+    2. Запускает оптимизацию.
+    3. Запускает симуляцию.
+    4. Собирает данные и строит общий график (и таблицу).
+    """
+    print(f"Запуск анализа пресетов двигателей: {len(enginePresetPaths)} конфигураций")
+
+    simulationDataList = []
+
+    for presetPath in enginePresetPaths:
+        config = loadConfiguration(presetPath)
+        originalRocket = config["rocket"]
+        simulator = config["simulator"]
+        atmosphere = config["atmosphere"]
+        gravity = config["gravity"]
+        aerodynamics = config["aerodynamics"]
+
+        rocketCopy = copy.deepcopy(originalRocket)
+
+        ve = rocketCopy.stages[0].exhaustVelocity if rocketCopy.stages else 0.0
+        seaLevelThrust = rocketCopy.stages[0].seaLevelThrust if rocketCopy.stages else 0.0
+        vacuumThrust = rocketCopy.stages[0].vacuumThrust if rocketCopy.stages else 0.0
+
+        shortVe = f"{ve / 1000:.1f}km_s"
+        shortSeaLevelThrust = f"{seaLevelThrust / 1000:.0f}kN(sl)"
+        shortVacuumThrust = f"{vacuumThrust / 1000:.0f}kN(v)"
+
+        rocketCopy.name = f"{originalRocket.name}—Ve{shortVe}—T{shortSeaLevelThrust}_{shortVacuumThrust}"
+        print(f"- Запуск оптимизации и симуляции для {rocketCopy.name}")
+
+        optimizer = RocketOptimizer(rocketCopy, simulator, atmosphere, gravity, aerodynamics, integrationMethod)
+        result = optimizer.optimize(maxiter=300)
+
+        shortRocketMass = f"{rocketCopy.getFullRocketMass() / 1000.0:.0f}t"
+        rocketCopy.name = rocketCopy.name + f"—M{shortRocketMass}"
+
+        timeHist, heightHist, velHist = simulator.runSimulation(
+            rocketCopy,
+            gravity,
+            atmosphere,
+            aerodynamics,
+            plot=False,
+            saveCSV=False,
+            savePlot=saveIndividualPlots,
+            integrationMethod=integrationMethod
+        )
+
+        if saveConfigs:
+            saveRocketConfigurationToMyConfigs(
+                rocket=rocketCopy,
+                aerodynamics=aerodynamics,
+                fileName=None
+            )
+
+        simulationDataList.append((rocketCopy.name, rocketCopy.getFullRocketMass(), timeHist, heightHist, velHist))
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    os.makedirs("results/plots", exist_ok=True)
+    os.makedirs("results/tables", exist_ok=True)
+
+    if simulationDataList and saveCommonPlot:
+        commonSavePath = f"results/plots/engine_comparison_{timestamp}.png"
+        plotMultipleRocketSimulations(
+            simulationDataList=simulationDataList,
+            targetVelocity=simulator.targetVelocity,
+            savePath=commonSavePath,
+            show=commonPlotShow
+        )
+
+    if simulationDataList and saveCommonTable:
+        tablePath = f"results/tables/engine_results_{timestamp}.csv"
+        with open(tablePath, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                "rocket_name",
+                "rocket_mass_kg",
+                "final_time_s",
+                "final_height_m",
+                "final_velocity_m_s",
+                "target_velocity_m_s"
+            ])
+            for name, mass, timeHist, heightHist, velHist in simulationDataList:
+                finalT = timeHist[-1] if timeHist else 0.0
+                finalH = heightHist[-1] if heightHist else 0.0
+                finalV = velHist[-1] if velHist else 0.0
+                writer.writerow([
+                    name,
+                    f"{mass:.2f}",
+                    f"{finalT:.2f}",
+                    f"{finalH:.2f}",
+                    f"{finalV:.2f}",
+                    f"{simulator.targetVelocity:.2f}"
+                ])
+        print(f"Общая таблица сохранена: {tablePath}")
