@@ -1,5 +1,6 @@
 class Aerodynamics:
     """Класс аэродинамики"""
+    
     def __init__(self, dragCoefficient: float = 0.5, referenceArea: float = 20.0):
         self.dragCoefficient = dragCoefficient
         self.referenceArea = referenceArea

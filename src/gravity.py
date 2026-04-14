@@ -1,5 +1,6 @@
 class Gravity:
     """Класс расчета гравитации"""
+
     def __init__(self,
                  planetRadius: float = 6371000.0,
                  planetMass: float = 5.972e24,

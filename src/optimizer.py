@@ -4,7 +4,8 @@ import copy
 from scipy.optimize import differential_evolution, brute
 
 class RocketOptimizer:
-    """Оптимизатор массы ракеты (минимизация полной массы при достижении целей)"""
+    """Оптимизатор массы ракеты"""
+
     def __init__(self, rocket, simulator, atmosphere, gravity, aerodynamics, integrationMethod: str = "euler"):
         self.rocket = rocket
         self.simulator = simulator
@@ -70,7 +71,7 @@ class RocketOptimizer:
                             bounds: list[tuple[float, float]] | None = None,
                             targetVelocity: float | None = None,
                             gridResolution: int = 20) -> dict:
-        """Перебирает все комбинации по равномерной сетке."""
+        """Перебирает все комбинации масс по равномерной сетке."""
 
         if targetVelocity is None:
             targetVelocity = self.simulator.targetVelocity

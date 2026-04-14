@@ -7,7 +7,7 @@ from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src.config import loadConfiguration, saveRocketConfigurationToMyConfigs
+from src.config import loadConfiguration, saveRocketConfiguration
 from src.optimizer import RocketOptimizer
 
 
@@ -17,7 +17,7 @@ def plotMultipleRocketSimulations(
     savePath: str | None = None,
     show: bool = True
 ):
-    """Выводит несколько симуляций на одном рисунке."""
+    """Выводит результат нескольких симуляций на одном рисунке."""
     
     if not simulationDataList:
         print("Нет данных для общего графика")
@@ -140,7 +140,7 @@ def runThrustExhaustVelocityGridAnalysis(
         )
 
         if saveConfigs:
-            saveRocketConfigurationToMyConfigs(
+            saveRocketConfiguration(
                 rocket=rocketCopy,
                 aerodynamics=aerodynamics,
                 fileName=None
@@ -259,7 +259,7 @@ def runEngineAnalysis(
     integrationMethod: str = "euler"
 ):
     """
-    Анализирует список пресетов ракет (одноступенчатые ракеты с разными двигателями).
+    Анализирует список пресетов ракет (одноступенчатые ракеты с разными двигателями).  
     1. Загружает конфигурацию.
     2. Запускает оптимизацию.
     3. Запускает симуляцию.
@@ -308,7 +308,7 @@ def runEngineAnalysis(
         )
 
         if saveConfigs:
-            saveRocketConfigurationToMyConfigs(
+            saveRocketConfiguration(
                 rocket=rocketCopy,
                 aerodynamics=aerodynamics,
                 fileName=None

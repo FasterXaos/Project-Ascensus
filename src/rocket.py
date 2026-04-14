@@ -23,14 +23,18 @@ class Rocket:
         return fullMass + self.payloadMass
     
     def setHeight(self, height: float | None = None) -> None:
-        """Устанавливает текущую высоту ракеты.
-        Если height=None — сбрасывает на initialAltitude (по умолчанию)"""
+        """
+        Устанавливает текущую высоту ракеты.  
+        Если height=None — сбрасывает на initialAltitude (по умолчанию)
+        """
 
         self.currentHeight = height if height is not None else self.initialAltitude
 
     def initializeMassesFromFuelMasses(self, fuelMasses: list[float]) -> None:
-        """Инициализирует fuelMass и structuralMass для каждой ступени по списку топлива.
-        Полностью пересчитывает все зависимые поля ступени."""
+        """
+        Инициализирует `fuelMass` и `structuralMass` для каждой ступени по списку топлива.  
+        Полностью пересчитывает все зависимые поля ступени.
+        """
         
         if len(fuelMasses) != len(self.stages):
             raise ValueError(f"Список fuelMasses должен содержать {len(self.stages)} значений")
@@ -59,16 +63,14 @@ class Rocket:
             return
         
         if -len(self.activeStages) <= stageIndex < len(self.activeStages):
-            detachedStage = self.activeStages.pop(stageIndex)
+            self.activeStages.pop(stageIndex)
 
-            # print(
-            #    f"Ступень {detachedStage.name} отсоединена. "
-            #    f"Текущая масса ракеты: {self.getCurrentRocketMass():.2f} кг"
-            # )
 
     def reloadRocket(self, resetHeight: bool = True) -> None:
-        """Перезагрузка ракеты: полностью восстанавливает активные ступени и топливо.
-        Флаг resetHeight (по умолчанию True) вызывает setHeight()"""
+        """
+        Перезагрузка ракеты: полностью восстанавливает активные ступени и топливо.  
+        Флаг `resetHeight` (по умолчанию `True`) вызывает `setHeight()`
+        """
         
         for stage in self.stages:
             stage.currentFuelMass = stage.fuelMass
@@ -82,8 +84,10 @@ class Rocket:
               f"Высота {'сброшена' if resetHeight else 'не изменена'}.")
         
     def calculateIdealMaximumVelocity(self) -> float:
-        """Расчёт максимальной идеальной скорости (Δv) по формуле Циолковского
-        для многоступенчатой ракеты в вакууме (без гравитации и сопротивления)."""
+        """
+        Расчёт максимальной идеальной скорости (Δv) по формуле Циолковского
+        для многоступенчатой ракеты в вакууме (без гравитации и сопротивления).
+        """
 
         totalDeltaV = 0.0
         upperMass = self.payloadMass

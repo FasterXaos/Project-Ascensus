@@ -2,6 +2,7 @@ import math
 
 class Atmosphere:
     """Класс атмосферы"""
+    
     def __init__(self, seaLevelDensity: float = 1.225, seaLevelPressure: float = 101325.0, scaleHeight: float = 8500.0):
         self.seaLevelDensity = seaLevelDensity
         self.seaLevelPressure = seaLevelPressure

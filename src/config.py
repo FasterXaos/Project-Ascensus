@@ -180,7 +180,7 @@ def loadConfiguration(rocketConfigPath: str = "configs/rocket/TwoStageRocket.jso
         "aerodynamics": aerodynamics
     }
 
-def saveRocketConfigurationToMyConfigs(rocket: Rocket,
+def saveRocketConfiguration(rocket: Rocket,
                                        aerodynamics: Aerodynamics,
                                        fileName: str | None = None,
                                        saveDir: str = "myConfigs") -> str:

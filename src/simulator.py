@@ -16,9 +16,11 @@ class Simulator:
                       aerodynamics, plot: bool = False,
                       saveCSV: bool = False,
                       savePlot: bool = False,
-                      integrationMethod: str = "rk4"):
-        """Запускает 1D симуляцию полёта ракеты.
-        Методы интегрирования: 'euler' (по умолчанию) или 'rk4'"""
+                      integrationMethod: str = "euler"):
+        """
+        Запускает 1D симуляцию полёта ракеты.  
+        Методы интегрирования: 'euler' (по умолчанию) или 'rk4'
+        """
 
         if saveCSV:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -57,7 +59,6 @@ class Simulator:
                     rocket.detachStage(-1)
                     continue
 
-                # Обновляем топливо и получаем thrust за полный шаг
                 thrust = activeStage.updateFuelMassOverTime(self.timeStep, atmosphere, height)
 
             else:
@@ -125,7 +126,7 @@ class Simulator:
                 velocity += (self.timeStep / 6.0) * (k1Velocity + 2.0 * k2Velocity + 2.0 * k3Velocity + k4Velocity)
 
             else:
-                raise ValueError(f"Unsupported integrationMethod '{integrationMethod}'. Use 'euler' or 'rk4'.")
+                raise ValueError(f"Неподдерживаемый integrationMethod '{integrationMethod}'. Используйте 'euler' или 'rk4'.")
 
             if height < 0.0:
                 height = 0.0
@@ -152,9 +153,6 @@ class Simulator:
                 ])
 
             currentTime += self.timeStep
-
-            # if velocity >= self.targetVelocity:
-            #     break
 
         rocket.currentHeight = height
 

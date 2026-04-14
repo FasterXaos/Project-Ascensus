@@ -1,5 +1,3 @@
-import src.atmosphere
-
 class Stage:
     """Класс одной ступени ракеты"""
 
@@ -24,8 +22,7 @@ class Stage:
         self.currentFuelMass = self.fuelMass
 
     def getThrustAtHeight(self, height: float, atmosphere) -> float:
-        """Тяга на заданной высоте по формуле
-        """
+        """Тяга на заданной высоте"""
         if self.vacuumThrust <= 0.0:
             return 0.0
         ambientPressure = atmosphere.getPressureAtHeight(height)
@@ -33,7 +30,7 @@ class Stage:
         return max(self.vacuumThrust - ambientPressure * self.exhaustArea, 0.0)
 
     def updateFuelMassOverTime(self, timeStep: float, atmosphere, height: float = 0.0) -> float:
-        """Обновляет currentFuelMass и возвращает эффективную тягу за этот шаг."""
+        """Обновляет `currentFuelMass` и возвращает тягу за этот шаг."""
         if self.massFlowRate <= 0.0 or self.currentFuelMass <= 0.0:
             return 0.0
 
